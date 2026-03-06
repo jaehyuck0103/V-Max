@@ -235,7 +235,7 @@ def make_sgd_step(
 
             return x
 
-        shuffled_transitions = jax.tree_util.tree_map(convert_data, transitions)
+        shuffled_transitions = jax.tree.map(convert_data, transitions)
         (training_state, _), sgd_metrics = jax.lax.scan(
             minibatch_step,
             (training_state, key_grad),
@@ -304,7 +304,7 @@ def _make_loss_fn(
         key: jax.Array,
     ) -> tuple[jax.Array, datatypes.Metrics]:
         # (T, B, ...) -> (B, T, ...)
-        data = jax.tree_util.tree_map(lambda x: jnp.swapaxes(x, 0, 1), data)
+        data = jax.tree.map(lambda x: jnp.swapaxes(x, 0, 1), data)
 
         # Flatten the batch dimension
         obs = jnp.reshape(data.observation, (-1,) + data.observation.shape[2:])

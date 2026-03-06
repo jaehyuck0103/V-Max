@@ -337,10 +337,10 @@ def plot_pdm_debug(  # noqa: C901
     if batch_idx > -1:
         if len(obs.shape) != 2:
             raise ValueError(f"Expecting ndim 2 for obs, got {len(obs.shape)}")
-        obs = jax.tree_util.tree_map(lambda x: x[batch_idx], obs)
+        obs = jax.tree.map(lambda x: x[batch_idx], obs)
 
     # Shape: (obs_A,) -> ()
-    obs = jax.tree_map(lambda x: x[obj_idx], obs)
+    obs = jax.tree.map(lambda x: x[obj_idx], obs)
     if obs.shape:
         raise ValueError(f"Expecting shape () for obs, got {obs.shape}")
 

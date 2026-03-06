@@ -113,7 +113,7 @@ def _compute_overlap_reward(state: datatypes.SimulatorState) -> bool:
     overlap = waymax_metrics.OverlapMetric().compute(state).value
 
     sdc_idx = operations.get_index(state.object_metadata.is_sdc)
-    sdc_overlap = jax.tree_util.tree_map(lambda x: x[sdc_idx], overlap)
+    sdc_overlap = jax.tree.map(lambda x: x[sdc_idx], overlap)
 
     return sdc_overlap == 1.0
 
@@ -131,7 +131,7 @@ def _compute_offroad_reward(state: datatypes.SimulatorState) -> bool:
     offroad = waymax_metrics.OffroadMetric().compute(state).value
 
     sdc_idx = operations.get_index(state.object_metadata.is_sdc)
-    sdc_offroad = jax.tree_util.tree_map(lambda x: x[sdc_idx], offroad)
+    sdc_offroad = jax.tree.map(lambda x: x[sdc_idx], offroad)
 
     return sdc_offroad == 1.0
 

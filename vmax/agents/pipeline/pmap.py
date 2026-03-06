@@ -31,7 +31,7 @@ def unpmap(v):
         A pytree where each leaf is the first replica.
 
     """
-    return jax.tree_util.tree_map(lambda x: x[0], v)
+    return jax.tree.map(lambda x: x[0], v)
 
 
 def flatten_tree(v):
@@ -44,7 +44,7 @@ def flatten_tree(v):
         A pytree with each array flattened.
 
     """
-    return jax.tree_util.tree_map(lambda x: x.flatten(), v)
+    return jax.tree.map(lambda x: x.flatten(), v)
 
 
 def bcast_local_devices(value, local_devices_to_use=1):
@@ -84,8 +84,8 @@ def _fingerprint(x: Any) -> float:
         The computed fingerprint as a float.
 
     """
-    sums = jax.tree_util.tree_map(jnp.sum, x)
-    return jax.tree_util.tree_reduce(lambda x, y: x + y, sums)
+    sums = jax.tree.map(jnp.sum, x)
+    return jax.tree.reduce(lambda x, y: x + y, sums)
 
 
 def is_replicated(x: Any, axis_name: str) -> jax.Array:

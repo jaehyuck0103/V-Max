@@ -30,7 +30,7 @@ class ComfortMetric(abstract_metric.AbstractMetric):
         )
         sdc_index = operations.get_index(simulator_state.object_metadata.is_sdc)
 
-        sdc_traj = jax.tree_util.tree_map(lambda x: x[sdc_index], past_traj)
+        sdc_traj = jax.tree.map(lambda x: x[sdc_index], past_traj)
 
         lateral_accel = _compute_lateral_acceleration(sdc_traj, constants.TIME_DELTA)
         long_accel = _compute_longitudinal_acceleration(sdc_traj, constants.TIME_DELTA)
@@ -69,7 +69,7 @@ class ComfortMetric(abstract_metric.AbstractMetric):
         )
         sdc_index = operations.get_index(simulator_state.object_metadata.is_sdc)
 
-        sdc_traj = jax.tree_util.tree_map(lambda x: x[sdc_index], past_traj)
+        sdc_traj = jax.tree.map(lambda x: x[sdc_index], past_traj)
 
         lateral_accel = _compute_lateral_acceleration(sdc_traj, constants.TIME_DELTA)
         long_accel = _compute_longitudinal_acceleration(sdc_traj, constants.TIME_DELTA)

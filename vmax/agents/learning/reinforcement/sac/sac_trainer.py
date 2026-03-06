@@ -171,7 +171,7 @@ def train(
     prefill_keys = jax.random.split(prefill_key, num_devices)
 
     buffer_state = prefill_replay_buffer(next(data_generator), buffer_state, prefill_keys)
-    jax.tree_util.tree_map(lambda x: x.block_until_ready(), buffer_state)
+    jax.tree.map(lambda x: x.block_until_ready(), buffer_state)
     print("-> Prefilling replay buffer... Done.")
 
     time_training = perf_counter()
@@ -202,7 +202,7 @@ def train(
             buffer_state,
             iter_keys,
         )
-        jax.tree_util.tree_map(lambda x: x.block_until_ready(), training_metrics)
+        jax.tree.map(lambda x: x.block_until_ready(), training_metrics)
 
         epoch_training_time = perf_counter() - t
 
@@ -229,7 +229,7 @@ def train(
         t = perf_counter()
         if do_evaluation and not iter % eval_freq:
             eval_metrics = run_evaluation(eval_scenario, training_state)
-            jax.tree_util.tree_map(lambda x: x.block_until_ready(), eval_metrics)
+            jax.tree.map(lambda x: x.block_until_ready(), eval_metrics)
             eval_metrics = pmap.flatten_tree(eval_metrics)
             eval_metrics = _metrics.collect(eval_metrics, "ep_len_mean")
             progress_fn(current_step, eval_metrics)

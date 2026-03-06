@@ -228,7 +228,7 @@ def make_sgd_step(
             optimizer_state=training_state.policy_optimizer_state,
         )
 
-        new_target_value_params = jax.tree_util.tree_map(
+        new_target_value_params = jax.tree.map(
             lambda x, y: x * (1 - tau) + y * tau,
             training_state.params.target_value,
             value_params,

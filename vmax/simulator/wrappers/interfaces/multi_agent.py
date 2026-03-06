@@ -129,7 +129,7 @@ class MultiAgentBraxWrapper(Wrapper):
         reward = self.reward(next_state, action)
 
         # TODO - use sdc idx
-        termination = jax.tree_util.tree_map(
+        termination = jax.tree.map(
             lambda x: x[0], self.termination(next_state)
         )  # termination for SDC only
         truncation = self.truncation(next_state)

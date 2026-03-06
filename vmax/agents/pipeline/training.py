@@ -71,12 +71,12 @@ def run_training_off_policy(
         )
 
         # (unroll_length, num_envs, ...) -> (num_envs * unroll_length, ...)
-        data = jax.tree_util.tree_map(lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), data)
+        data = jax.tree.map(lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), data)
         buffer_state = replay_buffer.insert(buffer_state, data)
 
         buffer_state, transitions = replay_buffer.sample(buffer_state)
         # (batch_size * grad_updates_per_step, ...) -> (grad_updates_per_step, batch_size, ...)
-        transitions = jax.tree_util.tree_map(
+        transitions = jax.tree.map(
             lambda x: jnp.reshape(x, (grad_updates_per_step, -1) + x.shape[1:]),
             transitions,
         )
@@ -167,9 +167,9 @@ def run_training_on_policy(
     )
 
     # (batch_size, unroll_length, num_envs, ...) -> (batch_size, num_envs, unroll_length, ...)
-    data = jax.tree_util.tree_map(lambda x: jnp.swapaxes(x, 1, 2), data)
+    data = jax.tree.map(lambda x: jnp.swapaxes(x, 1, 2), data)
     # (batch_size, num_envs, unroll_length, ...)
-    data = jax.tree_util.tree_map(lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), data)
+    data = jax.tree.map(lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), data)
 
     (training_state, _), sgd_metrics = jax.lax.scan(
         functools.partial(learning_fn, transitions=data),
@@ -194,13 +194,11 @@ def _reshape_metrics(rollout_metrics: dict, sgd_metrics: dict) -> dict:
 
     """
     # (num_episodes, unroll_length, num_envs) -> (num_steps, num_envs)
-    rollout_metrics = jax.tree_util.tree_map(
-        lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), rollout_metrics
-    )
+    rollout_metrics = jax.tree.map(lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), rollout_metrics)
     # (num_steps, num_envs) -> (num_envs, num_steps)
-    rollout_metrics = jax.tree_util.tree_map(lambda x: jnp.swapaxes(x, 0, 1), rollout_metrics)
+    rollout_metrics = jax.tree.map(lambda x: jnp.swapaxes(x, 0, 1), rollout_metrics)
     # (scan_length, grad_updates_per_step)
-    sgd_metrics = jax.tree_util.tree_map(lambda x: jnp.swapaxes(x, 0, 1), sgd_metrics)
+    sgd_metrics = jax.tree.map(lambda x: jnp.swapaxes(x, 0, 1), sgd_metrics)
 
     return {
         **{f"{name}": value for name, value in rollout_metrics.items()},
@@ -256,7 +254,7 @@ def run_evaluation(
         length=scan_length,
     )
 
-    eval_metrics = jax.tree_util.tree_map(lambda x: jnp.swapaxes(x, 0, 1), eval_metrics)
+    eval_metrics = jax.tree.map(lambda x: jnp.swapaxes(x, 0, 1), eval_metrics)
 
     return eval_metrics
 
