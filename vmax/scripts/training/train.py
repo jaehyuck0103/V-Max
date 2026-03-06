@@ -15,7 +15,6 @@ from vmax import PATH_TO_APP, simulator
 from vmax.agents import learning
 from vmax.scripts.training import train_utils
 
-
 OmegaConf.register_new_resolver("output_dir", train_utils.resolve_output_dir)
 
 

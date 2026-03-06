@@ -218,7 +218,9 @@ def _assemble_value_network(
     return Network(init=lambda key: value_net.init(key, dummy_obs, dummy_action), apply=apply)
 
 
-def make_policy_network(config: dict, obs_size: int, output_size: int, unflatten_fn) -> tuple[Network, Network | None]:
+def make_policy_network(
+    config: dict, obs_size: int, output_size: int, unflatten_fn
+) -> tuple[Network, Network | None]:
     """Create a policy network based on the provided configuration.
 
     Args:

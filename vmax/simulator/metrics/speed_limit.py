@@ -8,7 +8,6 @@ from waymax.metrics import abstract_metric
 from vmax.simulator import operations
 from vmax.simulator.metrics import utils
 
-
 SPEED_LIMITS_PER_LANE_TYPE = {1: 70.0, 2: 45.0}  # miles per hour
 
 
@@ -80,7 +79,9 @@ def infer_speed_limit_from_roadgraph(state: datatypes.SimulatorState):
     lane_type = roadgraph_points.types[nearest_lane_center_idx]
 
     # Avoid concretization error but it is ugly
-    speed_limit_mph = jnp.where(lane_type == 1, SPEED_LIMITS_PER_LANE_TYPE[1], SPEED_LIMITS_PER_LANE_TYPE[2])
+    speed_limit_mph = jnp.where(
+        lane_type == 1, SPEED_LIMITS_PER_LANE_TYPE[1], SPEED_LIMITS_PER_LANE_TYPE[2]
+    )
 
     return speed_limit_mph / 2.237, lane_type  # convert to meters per second
 

@@ -71,7 +71,9 @@ def get_id_red_for_sdc(sdc_obs: datatypes.Observation) -> jax.Array:
 
     traffic_lights_ids = sdc_obs.traffic_lights.lane_ids[:, 0]
     # Sort ids in distance order
-    traffic_lights_ids = traffic_lights_ids[jnp.argsort(jnp.linalg.norm(sdc_obs.traffic_lights.xy[:, 0, :], axis=1))]
+    traffic_lights_ids = traffic_lights_ids[
+        jnp.argsort(jnp.linalg.norm(sdc_obs.traffic_lights.xy[:, 0, :], axis=1))
+    ]
 
     mask_traffic_lights_ids = jnp.isin(traffic_lights_ids, lane_ids)
     id_ = traffic_lights_ids[jnp.argmax(mask_traffic_lights_ids)]
@@ -132,7 +134,9 @@ def _closed_line_time_t(state: datatypes.SimulatorState) -> jax.Array:
     return jnp.where(mask_is_red_light_red, traf_light.lane_ids[:, time_step], -2)
 
 
-def get_previous_lane_id_before_closed_line_idx(selected_path: jax.Array, closed_line_ids: jax.Array) -> jax.Array:
+def get_previous_lane_id_before_closed_line_idx(
+    selected_path: jax.Array, closed_line_ids: jax.Array
+) -> jax.Array:
     """Fetch the lane identifier preceding a closed lane on the selected path.
 
     Args:
@@ -184,7 +188,9 @@ def _get_current_and_last_lane_id(
     return last_rg_id, current_rg_id
 
 
-def _get_front_position_sdc(trajectory: datatypes.Trajectory, sdc_idx: int, timestep: int) -> jax.Array:
+def _get_front_position_sdc(
+    trajectory: datatypes.Trajectory, sdc_idx: int, timestep: int
+) -> jax.Array:
     """Get the front position of the ego vehicle.
 
     Args:

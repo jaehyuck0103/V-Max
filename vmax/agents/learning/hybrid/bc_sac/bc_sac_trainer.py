@@ -21,7 +21,6 @@ from vmax.agents.pipeline import inference, pmap
 from vmax.scripts.training import train_utils
 from vmax.simulator import metrics as _metrics
 
-
 if typing.TYPE_CHECKING:
     from waymax import datatypes as waymax_datatypes
     from waymax import env as waymax_env
@@ -233,10 +232,14 @@ def train(
         axis_name="batch",
     )
     rng, rb_key, prefill_key = jax.random.split(rng, 3)
-    imitation_buffer_state = jax.pmap(imitation_replay_buffer.init)(jax.random.split(rb_key, num_devices))
+    imitation_buffer_state = jax.pmap(imitation_replay_buffer.init)(
+        jax.random.split(rb_key, num_devices)
+    )
 
     prefill_keys = jax.random.split(prefill_key, num_devices)
-    imitation_buffer_state = prefill_replay_buffer(next(data_generator), imitation_buffer_state, prefill_keys)
+    imitation_buffer_state = prefill_replay_buffer(
+        next(data_generator), imitation_buffer_state, prefill_keys
+    )
 
     jax.tree_util.tree_map(lambda x: x.block_until_ready(), imitation_buffer_state)
     print("-> Prefilling replay buffer... Done.")
@@ -249,7 +252,13 @@ def train(
     buffer_state = rl_buffer_state
 
     print("-> Ground Control to Major Tom...")
-    for iter in tqdm(range(total_iters), desc="Training", total=total_iters, dynamic_ncols=True, disable=disable_tqdm):
+    for iter in tqdm(
+        range(total_iters),
+        desc="Training",
+        total=total_iters,
+        dynamic_ncols=True,
+        disable=disable_tqdm,
+    ):
         rng, iter_key = jax.random.split(rng)
         iter_keys = jax.random.split(iter_key, num_devices)
 
@@ -319,7 +328,9 @@ def train(
             metrics["runtime/training_time"] = epoch_training_time
             metrics["runtime/log_time"] = epoch_log_time
             metrics["runtime/eval_time"] = epoch_eval_time
-            metrics["runtime/iter_time"] = epoch_data_time + epoch_training_time + epoch_log_time + epoch_eval_time
+            metrics["runtime/iter_time"] = (
+                epoch_data_time + epoch_training_time + epoch_log_time + epoch_eval_time
+            )
             metrics["runtime/wall_time"] = perf_counter() - time_training
             metrics["train/rl_gradient_steps"] = int(pmap.unpmap(training_state.rl_gradient_steps))
             metrics["train/il_gradient_steps"] = int(pmap.unpmap(training_state.il_gradient_steps))
@@ -328,7 +339,9 @@ def train(
             progress_fn(current_step, metrics, total_timesteps)
 
             if disable_tqdm:
-                print(f"-> Step {current_step}/{total_timesteps} - {(current_step / total_timesteps) * 100:.2f}%")
+                print(
+                    f"-> Step {current_step}/{total_timesteps} - {(current_step / total_timesteps) * 100:.2f}%"
+                )
 
     print(f"-> Training took {perf_counter() - time_training:.2f}s")
     assert current_step >= total_timesteps

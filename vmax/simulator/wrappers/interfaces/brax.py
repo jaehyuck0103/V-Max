@@ -105,7 +105,9 @@ class BraxWrapper(Wrapper):
 
         return metrics_dict
 
-    def reset(self, state: datatypes.SimulatorState, rng: jax.Array | None = None) -> EnvTransition:
+    def reset(
+        self, state: datatypes.SimulatorState, rng: jax.Array | None = None
+    ) -> EnvTransition:
         """Reset the environment and initializes the simulation state.
 
         This initializer sets the initial env_transition and fills the initial simulation
@@ -191,7 +193,9 @@ class BraxWrapper(Wrapper):
 class VmapWrapper(Wrapper):
     """Vectorizes Brax env."""
 
-    def reset(self, state: datatypes.SimulatorState, rng: jax.Array | None = None) -> EnvTransition:
+    def reset(
+        self, state: datatypes.SimulatorState, rng: jax.Array | None = None
+    ) -> EnvTransition:
         """Vectorized reset function for the environment.
 
         Args:
@@ -260,7 +264,9 @@ class AutoResetWrapper(Wrapper):
 
         scenario_id = self._increment_scenario_id(next_env_transition, self._total_scenarios)
 
-        updated_env_transition = jax.tree.map(where_done, self._pull_next_scenario(scenario_id), next_env_transition)
+        updated_env_transition = jax.tree.map(
+            where_done, self._pull_next_scenario(scenario_id), next_env_transition
+        )
         next_env_transition.info["scenario_id"] = scenario_id
 
         return next_env_transition.replace(
@@ -287,7 +293,9 @@ class AutoResetWrapper(Wrapper):
             self._current_scenario_id = 0
         elif len(batch_dims) == 2:
             self._total_scenarios = batch_dims[1]
-            self._current_scenario_id = jnp.zeros((scenario_buffer.batch_dims[0],), dtype=jnp.int32)
+            self._current_scenario_id = jnp.zeros(
+                (scenario_buffer.batch_dims[0],), dtype=jnp.int32
+            )
 
         return self._pull_next_scenario(self._current_scenario_id)
 

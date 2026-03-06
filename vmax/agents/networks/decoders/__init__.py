@@ -5,7 +5,6 @@
 
 from .mlp import MLP
 
-
 FullyConnected = MLP
 
 

@@ -151,7 +151,9 @@ def _compute_red_light_reward(state: datatypes.SimulatorState) -> bool:
     return has_runned_red_light
 
 
-def _compute_overspeed_limit_reward(state: datatypes.SimulatorState, threshold: float = 2.23) -> bool:
+def _compute_overspeed_limit_reward(
+    state: datatypes.SimulatorState, threshold: float = 2.23
+) -> bool:
     """Compute a reward based on speed-limit adherence.
 
     Returns True if the SDC's speed exceeds the road's speed limit by more than
@@ -247,7 +249,9 @@ def _compute_deviate_lane_reward(state: datatypes.SimulatorState) -> bool:
 # Reward based rewards
 
 
-def _compute_log_divergence_clip_reward(state: datatypes.SimulatorState, threshold: float = 0.3) -> bool:
+def _compute_log_divergence_clip_reward(
+    state: datatypes.SimulatorState, threshold: float = 0.3
+) -> bool:
     """Compute reward based on whether log divergence exceeds a threshold.
 
     The log divergence measures how much the SDC's trajectory deviates from the expected path.

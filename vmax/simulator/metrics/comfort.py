@@ -49,7 +49,9 @@ class ComfortMetric(abstract_metric.AbstractMetric):
 
         return abstract_metric.MetricResult.create_and_validate(value, valid)
 
-    def compute_reward(self, simulator_state: datatypes.SimulatorState) -> abstract_metric.MetricResult:
+    def compute_reward(
+        self, simulator_state: datatypes.SimulatorState
+    ) -> abstract_metric.MetricResult:
         """Compute the comfort metric for the simulation.
 
         Args:
@@ -83,7 +85,15 @@ class ComfortMetric(abstract_metric.AbstractMetric):
         value_yaw_accel = jnp.exp(-(jnp.maximum(0, jnp.max(jnp.abs(yaw_accel)) - 2.2)))
         value_yaw_rate = jnp.exp(-(jnp.maximum(0, jnp.max(jnp.abs(yaw_rate)) - 0.95)))
 
-        values = jnp.stack([value_lateral_accel, value_long_accel, value_long_jerk, value_yaw_accel, value_yaw_rate])
+        values = jnp.stack(
+            [
+                value_lateral_accel,
+                value_long_accel,
+                value_long_jerk,
+                value_yaw_accel,
+                value_yaw_rate,
+            ]
+        )
         # Compute weighted average so close to 0 values affect the result more
         weights = jnp.exp(-values)
 
@@ -233,6 +243,8 @@ def phase_unwrap(headings):
     # So adjustments[j+1] - adjustments[j] = round((headings[j+1] - headings[j]) / (2*pi)).
 
     two_pi = 2.0 * jnp.pi
-    adjustments = jnp.concatenate([jnp.zeros(1, dtype=jnp.float32), jnp.cumsum(jnp.round(jnp.diff(headings) / two_pi))])
+    adjustments = jnp.concatenate(
+        [jnp.zeros(1, dtype=jnp.float32), jnp.cumsum(jnp.round(jnp.diff(headings) / two_pi))]
+    )
     unwrapped = headings - two_pi * adjustments
     return unwrapped

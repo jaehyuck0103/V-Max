@@ -46,7 +46,9 @@ class MLPEncoder(nn.Module):
         """
         features, masks = self.unflatten_fn(obs)
 
-        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = features
+        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = (
+            features
+        )
         sdc_traj_valid_mask, other_traj_valid_mask, rg_valid_mask, tl_valid_mask = masks
 
         # Applying masks - 0 value to all features if unvalid
@@ -106,6 +108,8 @@ class MLPEncoder(nn.Module):
         )
 
         # Apply mlp
-        output = decoders.MLP(layer_sizes=self.concat_layer_sizes, activation=self.concat_activation)(input)
+        output = decoders.MLP(
+            layer_sizes=self.concat_layer_sizes, activation=self.concat_activation
+        )(input)
 
         return output

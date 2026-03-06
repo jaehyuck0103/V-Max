@@ -11,7 +11,6 @@ from waymax.utils import geometry
 from vmax.simulator import operations
 from vmax.simulator.metrics import on_multiple_lanes, utils
 
-
 LANE_WIDTH = 3.0
 
 
@@ -57,7 +56,11 @@ class AtFaultCollisionMetric(abstract_metric.AbstractMetric):
 
         ego_on_multiple_lanes = on_multiple_lanes.is_ego_on_multiple_lanes(simulator_state)
 
-        at_fault = is_vru + stopped + (~ego_stopped) * (front_collisions + lateral_collisions * ego_on_multiple_lanes)
+        at_fault = (
+            is_vru
+            + stopped
+            + (~ego_stopped) * (front_collisions + lateral_collisions * ego_on_multiple_lanes)
+        )
 
         value = jnp.sum((at_fault[1:]).astype(jnp.float32))
         valid = jnp.ones_like(value, dtype=bool)

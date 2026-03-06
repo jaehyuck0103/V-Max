@@ -108,7 +108,9 @@ class AttentionLayer(nn.Module):
     dropout: float = 0.0
 
     @nn.compact
-    def __call__(self, x: jax.Array, context=None, mask_k=None, mask_q=None, deterministic: bool = False) -> jax.Array:
+    def __call__(
+        self, x: jax.Array, context=None, mask_k=None, mask_q=None, deterministic: bool = False
+    ) -> jax.Array:
         """Perform attention on the input.
 
         Args:
@@ -206,14 +208,18 @@ class LocalAttentionLayer(nn.Module):
         v = einops.rearrange(v, "b n k (h d) -> b n k h d", h=h)
         q = einops.rearrange(q, "b n (h d) -> b n h d", h=h)
 
-        sim = jnp.einsum("b i h d, b i k h d -> b i k h", q, k) * self.head_features**-0.5  # [B,Nq,k,H]
+        sim = (
+            jnp.einsum("b i h d, b i k h d -> b i k h", q, k) * self.head_features**-0.5
+        )  # [B,Nq,k,H]
 
         if mask_q is not None:
             big_neg = jnp.finfo(jnp.float32).min
             sim = jnp.where(mask_q[:, :, None, None], sim, big_neg)
         if mask_k is not None:
             big_neg = jnp.finfo(jnp.float32).min
-            mask = jnp.take_along_axis(mask_k[:, :, None], index_pairs[:, :, :], axis=1)  # [B,Nq,K]
+            mask = jnp.take_along_axis(
+                mask_k[:, :, None], index_pairs[:, :, :], axis=1
+            )  # [B,Nq,K]
             sim = jnp.where(mask[:, :, :, None], sim, big_neg)
 
         attn = nn.softmax(sim, axis=-2)  # [B,Nq,k,H]

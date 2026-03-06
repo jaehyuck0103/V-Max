@@ -18,7 +18,9 @@ class ObjectFeatures:
 
     field_names: Sequence[str]  # Field names
     xy: jax.Array = field(default_factory=lambda: jnp.array(()))  # Position coordinates over time
-    vel_xy: jax.Array = field(default_factory=lambda: jnp.array(()))  # Velocity components over time
+    vel_xy: jax.Array = field(
+        default_factory=lambda: jnp.array(())
+    )  # Velocity components over time
     yaw: jax.Array = field(default_factory=lambda: jnp.array(()))  # Yaw angles over time
     length: jax.Array = field(default_factory=lambda: jnp.array(()))  # Object lengths
     width: jax.Array = field(default_factory=lambda: jnp.array(()))  # Object widths
@@ -50,7 +52,9 @@ class ObjectFeatures:
         if len(self.field_names) == 0:
             return jnp.array(())
 
-        return jnp.concatenate([getattr(self, field_name) for field_name in self.field_names], axis=-1)
+        return jnp.concatenate(
+            [getattr(self, field_name) for field_name in self.field_names], axis=-1
+        )
 
     def plot(self, ax) -> None:
         """Plot the object features."""
@@ -115,7 +119,9 @@ class RoadgraphFeatures:
         if len(self.field_names) == 0:
             return jnp.array(())
 
-        return jnp.concatenate([getattr(self, field_name) for field_name in self.field_names], axis=-1)
+        return jnp.concatenate(
+            [getattr(self, field_name) for field_name in self.field_names], axis=-1
+        )
 
     def plot(self, ax) -> None:
         """Plot the roadgraph features."""
@@ -152,7 +158,9 @@ class TrafficLightFeatures:
         if len(self.field_names) == 0:
             return jnp.array(())
 
-        return jnp.concatenate([getattr(self, field_name) for field_name in self.field_names], axis=-1)
+        return jnp.concatenate(
+            [getattr(self, field_name) for field_name in self.field_names], axis=-1
+        )
 
     def plot(self, ax) -> None:
         """Plot the traffic light features."""

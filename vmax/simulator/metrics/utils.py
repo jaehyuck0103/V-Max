@@ -8,7 +8,6 @@ import jax.numpy as jnp
 from jax.numpy.linalg import lstsq
 from waymax import datatypes
 
-
 LANE_WIDTH = 3.7  # meters (12 ft)
 MARGIN = 0.2  # meters
 
@@ -78,7 +77,9 @@ def savgol_filter_jax(x, window_length, polyorder, deriv=0, delta=1.0, mode="int
 
     # Ignore the edges for now
     y = jnp.where(jnp.arange(len(y)) < window_length // 2, y[window_length // 2], y)
-    y = jnp.where(jnp.arange(len(y)) >= len(y) - window_length // 2, y[len(y) - window_length // 2 - 1], y)
+    y = jnp.where(
+        jnp.arange(len(y)) >= len(y) - window_length // 2, y[len(y) - window_length // 2 - 1], y
+    )
     return y
 
 
@@ -162,7 +163,9 @@ def get_distance_to_lane_centers(
     squared_distances = jnp.sum(z_stretched_differences**2, axis=-1)
 
     is_lane_center = jnp.isin(roadgraph_points.types, jnp.array([1, 2]))
-    squared_distances = jnp.where(is_lane_center & roadgraph_points.valid, squared_distances, jnp.inf)
+    squared_distances = jnp.where(
+        is_lane_center & roadgraph_points.valid, squared_distances, jnp.inf
+    )
 
     return squared_distances
 
@@ -228,7 +231,9 @@ def get_corners_distance_to_lane_centers(
         An array of distances from each corner to the lane centers.
 
     """
-    squared_distances = get_corners_distance_to_roadgraph_points(ego_corners, roadgraph_points, z_stretch)
+    squared_distances = get_corners_distance_to_roadgraph_points(
+        ego_corners, roadgraph_points, z_stretch
+    )
     is_lane_center = jnp.isin(roadgraph_points.types, jnp.array([1, 2]))
     squared_distances = jnp.where(is_lane_center, squared_distances, jnp.inf)
     return squared_distances
@@ -279,4 +284,6 @@ def get_corners_distance_to_closest_lane_center(
 
     """
     nearest_lane_center_idx = get_closest_lane_center_idx(ego_xyz, roadgraph_points)
-    return get_corners_distance_to_lane_center(ego_xyz, ego_corners, roadgraph_points, nearest_lane_center_idx)
+    return get_corners_distance_to_lane_center(
+        ego_xyz, ego_corners, roadgraph_points, nearest_lane_center_idx
+    )

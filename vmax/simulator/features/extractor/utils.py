@@ -6,7 +6,6 @@
 import jax
 import jax.numpy as jnp
 
-
 MAX_METERS = 50  # m
 MAX_SPEED = 30  # m/s
 
@@ -94,7 +93,9 @@ def normalize_path(x: jax.Array, meters: int) -> jax.Array:
     return x
 
 
-def normalize_by_feature(data: jax.Array, feature_key: str, meters: int, dict_mapping: dict) -> jax.Array:
+def normalize_by_feature(
+    data: jax.Array, feature_key: str, meters: int, dict_mapping: dict
+) -> jax.Array:
     """Normalize the data by the feature key.
 
     Args:

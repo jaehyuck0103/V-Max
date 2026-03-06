@@ -117,7 +117,9 @@ def make_inference_fn(sac_network: SACNetworks) -> datatypes.Policy:
         policy_network = sac_network.policy_network
         parametric_action_distribution = sac_network.parametric_action_distribution
 
-        def policy(observations: jax.Array, key_sample: jax.Array = None) -> tuple[jax.Array, dict]:
+        def policy(
+            observations: jax.Array, key_sample: jax.Array = None
+        ) -> tuple[jax.Array, dict]:
             logits = policy_network.apply(params, observations)
 
             if deterministic:
@@ -157,8 +159,12 @@ def make_networks(
 
     output_size = parametric_action_distribution.param_size
 
-    policy_network = networks.make_policy_network(network_config, observation_size, output_size, unflatten_fn)
-    value_network = networks.make_value_network(network_config, observation_size, action_size, unflatten_fn)
+    policy_network = networks.make_policy_network(
+        network_config, observation_size, output_size, unflatten_fn
+    )
+    value_network = networks.make_value_network(
+        network_config, observation_size, action_size, unflatten_fn
+    )
 
     policy_optimizer = optax.adam(learning_rate)
     value_optimizer = optax.adam(learning_rate)
@@ -172,7 +178,9 @@ def make_networks(
     )
 
 
-def make_sgd_step(sac_network: SACNetworks, alpha: float, discount: float, tau: float) -> datatypes.LearningFunction:
+def make_sgd_step(
+    sac_network: SACNetworks, alpha: float, discount: float, tau: float
+) -> datatypes.LearningFunction:
     """Create the SGD step function for SAC.
 
     Args:
@@ -185,10 +193,16 @@ def make_sgd_step(sac_network: SACNetworks, alpha: float, discount: float, tau: 
         A function that executes an SGD step.
 
     """
-    value_loss, policy_loss = _make_loss_fn(sac_network=sac_network, alpha=alpha, discount=discount)
+    value_loss, policy_loss = _make_loss_fn(
+        sac_network=sac_network, alpha=alpha, discount=discount
+    )
 
-    policy_update = networks.gradient_update_fn(policy_loss, sac_network.policy_optimizer, pmap_axis_name="batch")
-    value_update = networks.gradient_update_fn(value_loss, sac_network.value_optimizer, pmap_axis_name="batch")
+    policy_update = networks.gradient_update_fn(
+        policy_loss, sac_network.policy_optimizer, pmap_axis_name="batch"
+    )
+    value_update = networks.gradient_update_fn(
+        value_loss, sac_network.value_optimizer, pmap_axis_name="batch"
+    )
 
     def sgd_step(
         carry: tuple[SACTrainingState, jax.Array],
@@ -240,7 +254,9 @@ def make_sgd_step(sac_network: SACNetworks, alpha: float, discount: float, tau: 
     return sgd_step
 
 
-def _make_loss_fn(sac_network: SACNetworks, alpha: float, discount: float) -> tuple[callable, callable]:
+def _make_loss_fn(
+    sac_network: SACNetworks, alpha: float, discount: float
+) -> tuple[callable, callable]:
     """Define the loss functions for SAC.
 
     Args:
@@ -263,17 +279,25 @@ def _make_loss_fn(sac_network: SACNetworks, alpha: float, discount: float) -> tu
         transitions: datatypes.RLTransition,
         key: jax.Array,
     ) -> jax.Array:
-        value_old_action = value_network.apply(value_params, transitions.observation, transitions.action)
+        value_old_action = value_network.apply(
+            value_params, transitions.observation, transitions.action
+        )
         next_dist_params = policy_network.apply(policy_params, transitions.next_observation)
 
-        next_action = parametric_action_distribution.sample_no_postprocessing(next_dist_params, key)
+        next_action = parametric_action_distribution.sample_no_postprocessing(
+            next_dist_params, key
+        )
         next_log_prob = parametric_action_distribution.log_prob(next_dist_params, next_action)
         next_action = parametric_action_distribution.postprocess(next_action)
 
-        next_value = value_network.apply(target_value_params, transitions.next_observation, next_action)
+        next_value = value_network.apply(
+            target_value_params, transitions.next_observation, next_action
+        )
         next_v = jnp.min(next_value, axis=-1) - alpha * next_log_prob
 
-        target_value = jax.lax.stop_gradient(transitions.reward + transitions.flag * discount * next_v)
+        target_value = jax.lax.stop_gradient(
+            transitions.reward + transitions.flag * discount * next_v
+        )
         value_error = value_old_action - jnp.expand_dims(target_value, -1)
         value_loss = 0.5 * jnp.mean(jnp.square(value_error))
 

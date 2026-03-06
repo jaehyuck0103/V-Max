@@ -127,7 +127,9 @@ class IDMFeaturesExtractor(extractor.VecFeaturesExtractor):
         features_list = []
 
         for i in range(num_agents):
-            agent_features = jnp.concatenate([xy[i], vel_xy[i], dimensions[i], jnp.expand_dims(valid[i], axis=0)])
+            agent_features = jnp.concatenate(
+                [xy[i], vel_xy[i], dimensions[i], jnp.expand_dims(valid[i], axis=0)]
+            )
             features_list.append(agent_features)
 
         return jnp.stack(features_list)
@@ -147,7 +149,9 @@ class IDMFeaturesExtractor(extractor.VecFeaturesExtractor):
         # Combine target path with validity
         return jnp.where(jnp.expand_dims(target_valid, axis=-1), target, jnp.zeros_like(target))
 
-    def _compute_red_light_position(self, state: datatypes.SimulatorState, sdc_obs: datatypes.Observation) -> jax.Array:
+    def _compute_red_light_position(
+        self, state: datatypes.SimulatorState, sdc_obs: datatypes.Observation
+    ) -> jax.Array:
         """Compute the red light position for the SDC.
 
         Args:

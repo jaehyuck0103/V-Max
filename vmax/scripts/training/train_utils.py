@@ -16,7 +16,6 @@ from tensorboardX import SummaryWriter
 
 from vmax.simulator import datasets
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -97,7 +96,9 @@ def log_metrics(
 
     """
     if total_timesteps is not None:
-        logger.info(f"-> Step {num_steps}/{total_timesteps} - {(num_steps / total_timesteps) * 100:.2f}%")
+        logger.info(
+            f"-> Step {num_steps}/{total_timesteps} - {(num_steps / total_timesteps) * 100:.2f}%"
+        )
         logger.info(f"-> Data time     : {metrics['runtime/data_time']:.2f}s")
         logger.info(f"-> Training time : {metrics['runtime/training_time']:.2f}s")
         logger.info(f"-> Log time      : {metrics['runtime/log_time']:.2f}s")

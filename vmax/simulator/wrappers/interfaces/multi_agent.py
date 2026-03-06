@@ -67,7 +67,9 @@ class MultiAgentBraxWrapper(Wrapper):
 
         return metrics_dict
 
-    def reset(self, state: datatypes.SimulatorState, rng: jax.Array | None = None) -> EnvTransition:
+    def reset(
+        self, state: datatypes.SimulatorState, rng: jax.Array | None = None
+    ) -> EnvTransition:
         """Reset the environment and initialize the simulation state.
 
         Args:
@@ -127,7 +129,9 @@ class MultiAgentBraxWrapper(Wrapper):
         reward = self.reward(next_state, action)
 
         # TODO - use sdc idx
-        termination = jax.tree_util.tree_map(lambda x: x[0], self.termination(next_state))  # termination for SDC only
+        termination = jax.tree_util.tree_map(
+            lambda x: x[0], self.termination(next_state)
+        )  # termination for SDC only
         truncation = self.truncation(next_state)
         done = jnp.logical_or(termination, truncation)
         flag = jnp.logical_not(termination)

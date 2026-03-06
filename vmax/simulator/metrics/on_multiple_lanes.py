@@ -47,7 +47,9 @@ def is_ego_on_multiple_lanes(state: datatypes.SimulatorState):
     """
     sdc_index = operations.get_index(state.object_metadata.is_sdc)
 
-    traj_5dof = state.current_sim_trajectory.stack_fields(["x", "y", "length", "width", "yaw"]).squeeze()
+    traj_5dof = state.current_sim_trajectory.stack_fields(
+        ["x", "y", "length", "width", "yaw"]
+    ).squeeze()
     ego_xyz = state.current_sim_trajectory.xyz[sdc_index].squeeze()
     ego_corners = geometry.corners_from_bbox(traj_5dof[sdc_index])
     roadgraph_points = state.roadgraph_points

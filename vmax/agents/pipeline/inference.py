@@ -152,7 +152,9 @@ def random_step(
         raise ValueError("Random key must be provided for random_step")
 
     # Generating actions within the specified bounds
-    actions = jax.random.uniform(key=key, shape=action_shape, minval=action_bounds[0], maxval=action_bounds[1])
+    actions = jax.random.uniform(
+        key=key, shape=action_shape, minval=action_bounds[0], maxval=action_bounds[1]
+    )
     actions = _create_valid_action(actions)
 
     next_env_transition = env.step(env_transition, actions)

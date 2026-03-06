@@ -6,7 +6,6 @@ from waymax.utils import geometry
 
 from vmax.simulator import constants
 
-
 # Minimum lead distance to prevent divide-by-zero errors.
 _MINIMUM_LEAD_DISTANCE = 0.1  # Units: m
 _MIN_SPACING = 2.0
@@ -86,7 +85,9 @@ def generate_unroll(observation: jax.Array, time_horizon: float = 4.0):
     # Red light handling
     # There was a major bug here for cases with red ligh but no cars
 
-    is_red_light_dangerous = (red_light_status == 1) & ~((lead_dist < jnp.linalg.norm(red_light_xy)) & is_colliding)
+    is_red_light_dangerous = (red_light_status == 1) & ~(
+        (lead_dist < jnp.linalg.norm(red_light_xy)) & is_colliding
+    )
     lead_dist = jnp.where(is_red_light_dangerous, jnp.linalg.norm(red_light_xy), lead_dist)
     is_colliding = is_colliding + is_red_light_dangerous
 
@@ -105,9 +106,13 @@ def generate_unroll(observation: jax.Array, time_horizon: float = 4.0):
     lead_dist = lead_dist + _MINIMUM_LEAD_DISTANCE * (lead_dist == 0.0)
 
     # Acceleration to take at time t
-    accel_action = _MAX_ACCEL * (1 - (curr_speed / desired_speed) ** _DELTA - (s_star / lead_dist) ** 2)
+    accel_action = _MAX_ACCEL * (
+        1 - (curr_speed / desired_speed) ** _DELTA - (s_star / lead_dist) ** 2
+    )
 
-    accel_action = jnp.clip(accel_action, -constants.MAX_ACCEL_BICYCLE, constants.MAX_ACCEL_BICYCLE)
+    accel_action = jnp.clip(
+        accel_action, -constants.MAX_ACCEL_BICYCLE, constants.MAX_ACCEL_BICYCLE
+    )
 
     # Compute steering with next position x, y of the agent
     new_speed = curr_speed + accel_action * constants.TIME_DELTA
@@ -290,7 +295,9 @@ def generate_smooth_trajectory(
 
     max_curvature = jnp.max(curvature)
 
-    d_merge = (d_merge_base + k_v * new_speed - curvature_factor * max_curvature) * alignment_scaling
+    d_merge = (
+        d_merge_base + k_v * new_speed - curvature_factor * max_curvature
+    ) * alignment_scaling
     h_merge = d_merge / new_speed
 
     h_merge = jnp.clip(h_merge, h_min, time_horizon)
@@ -313,7 +320,10 @@ def generate_smooth_trajectory(
     def bezier_curve(alpha):
         """Compute cubic Bezier curve."""
         return (
-            (1 - alpha) ** 3 * p0 + 3 * (1 - alpha) ** 2 * alpha * p1 + 3 * (1 - alpha) * alpha**2 * p2 + alpha**3 * p3
+            (1 - alpha) ** 3 * p0
+            + 3 * (1 - alpha) ** 2 * alpha * p1
+            + 3 * (1 - alpha) * alpha**2 * p2
+            + alpha**3 * p3
         )
 
     # Step 3: Sample the smooth path

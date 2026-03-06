@@ -53,7 +53,9 @@ def is_ego_driving_into_oncoming_traffic(state: datatypes.SimulatorState):
     closest_aligned_lane_idx = jnp.argmin(aligned_distances, axis=-1)  # 4,
     selected_lane_centers = roadgraph_points.xy[closest_aligned_lane_idx]  # 4, 2
     selected_lane_dirs = roadgraph_points.dir_xy[closest_aligned_lane_idx]  # 4, 2
-    selected_lane_normals = jnp.stack([-selected_lane_dirs[..., 1], selected_lane_dirs[..., 0]], axis=-1)  # 4, 2
+    selected_lane_normals = jnp.stack(
+        [-selected_lane_dirs[..., 1], selected_lane_dirs[..., 0]], axis=-1
+    )  # 4, 2
 
     corners_to_centers = ego_corners[..., :2] - selected_lane_centers
     corners_to_centers = jnp.abs(jnp.sum(corners_to_centers * selected_lane_normals, axis=-1))
@@ -69,7 +71,9 @@ def is_ego_driving_into_oncoming_traffic(state: datatypes.SimulatorState):
     closest_misaligned_lane_idx = jnp.argmin(misaligned_distances, axis=-1)  # 4,
     selected_lane_centers = roadgraph_points.xy[closest_misaligned_lane_idx]  # 4, 2
     selected_lane_dirs = roadgraph_points.dir_xy[closest_misaligned_lane_idx]  # 4, 2
-    selected_lane_normals = jnp.stack([-selected_lane_dirs[..., 1], selected_lane_dirs[..., 0]], axis=-1)  # 4, 2
+    selected_lane_normals = jnp.stack(
+        [-selected_lane_dirs[..., 1], selected_lane_dirs[..., 0]], axis=-1
+    )  # 4, 2
 
     corners_to_centers = ego_corners[..., :2] - selected_lane_centers
     corners_to_centers = jnp.abs(jnp.sum(corners_to_centers * selected_lane_normals, axis=-1))

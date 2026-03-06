@@ -26,7 +26,9 @@ class AbstractFeaturesExtractor(ABC):
         """
 
     @abstractmethod
-    def unflatten_features(self, vectorized_obs: jax.Array) -> tuple[tuple[jax.Array, ...], tuple[jax.Array, ...]]:
+    def unflatten_features(
+        self, vectorized_obs: jax.Array
+    ) -> tuple[tuple[jax.Array, ...], tuple[jax.Array, ...]]:
         """Convert a flat observation array back into feature tensors and masks.
 
         Args:

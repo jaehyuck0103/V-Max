@@ -22,7 +22,10 @@ from waymax import dynamics
 
 from vmax.agents import pipeline
 from vmax.simulator import make_env_for_evaluation, overrides, visualization
-from vmax.simulator.metrics.aggregators import nuplan_aggregate_score, vmax_aggregate_score
+from vmax.simulator.metrics.aggregators import (
+    nuplan_aggregate_score,
+    vmax_aggregate_score,
+)
 from vmax.simulator.metrics.collector import _metrics_operands
 
 
@@ -53,7 +56,9 @@ def run_scenario_jit(scenario, rng_key: jax.Array, step_fn, reset_fn):
 
         # Collect episode metrics.
         for key, value in env_transition.metrics.items():
-            episode_metrics[key] = episode_metrics[key].at[env_transition.info["steps"][0] - 1].set(value[0])
+            episode_metrics[key] = (
+                episode_metrics[key].at[env_transition.info["steps"][0] - 1].set(value[0])
+            )
 
         return env_transition, rng_key, episode_metrics
 
@@ -67,7 +72,9 @@ def run_scenario_jit(scenario, rng_key: jax.Array, step_fn, reset_fn):
     return episode_metrics, env_transition.info["steps"]
 
 
-def run_scenario_render(scenario, rng_key: jax.Array, env, step_fn, reset_fn, render_pov: bool = False):
+def run_scenario_render(
+    scenario, rng_key: jax.Array, env, step_fn, reset_fn, render_pov: bool = False
+):
     """Render a scenario in the environment and return the rendered images."""
     # Reset environment for the new scenario.
     rng_key, reset_key = jax.random.split(rng_key)
@@ -100,16 +107,24 @@ def get_algorithm_modules(algorithm: str):
     algorithm = algorithm.lower()
     if algorithm == "sac":
         from vmax.agents.learning.reinforcement.sac.sac_factory import make_inference_fn
-        from vmax.agents.learning.reinforcement.sac.sac_factory import make_networks as build_network
+        from vmax.agents.learning.reinforcement.sac.sac_factory import (
+            make_networks as build_network,
+        )
     elif algorithm == "bc":
         from vmax.agents.learning.imitation.bc.bc_factory import make_inference_fn
-        from vmax.agents.learning.imitation.bc.bc_factory import make_networks as build_network
+        from vmax.agents.learning.imitation.bc.bc_factory import (
+            make_networks as build_network,
+        )
     elif algorithm == "bc_sac":
         from vmax.agents.learning.hybrid.bc_sac.bc_sac_factory import make_inference_fn
-        from vmax.agents.learning.hybrid.bc_sac.bc_sac_factory import make_networks as build_network
+        from vmax.agents.learning.hybrid.bc_sac.bc_sac_factory import (
+            make_networks as build_network,
+        )
     elif algorithm == "ppo":
         from vmax.agents.learning.reinforcement.ppo.ppo_factory import make_inference_fn
-        from vmax.agents.learning.reinforcement.ppo.ppo_factory import make_networks as build_network
+        from vmax.agents.learning.reinforcement.ppo.ppo_factory import (
+            make_networks as build_network,
+        )
     else:
         raise ValueError(f"Invalid algorithm: {algorithm}")
 
@@ -162,7 +177,9 @@ def setup_evaluation(
         eval_config["policy"] = eval_config["algorithm"]["network"]["policy"]
         eval_config["value"] = eval_config["algorithm"]["network"]["value"]
         eval_config["unflatten_config"] = eval_config["observation_config"]
-        eval_config["action_distribution"] = eval_config["algorithm"]["network"]["action_distribution"]
+        eval_config["action_distribution"] = eval_config["algorithm"]["network"][
+            "action_distribution"
+        ]
 
         termination_keys = eval_config["termination_keys"]
 
@@ -278,7 +295,9 @@ def load_params(path: str) -> Any:
             def find_class(self, module, name):
                 # Map old module paths to new ones
                 if module.startswith("vmax.learning.algorithms"):
-                    new_module = module.replace("vmax.learning.algorithms.rl", "vmax.agents.learning.reinforcement")
+                    new_module = module.replace(
+                        "vmax.learning.algorithms.rl", "vmax.agents.learning.reinforcement"
+                    )
                     print(f"Remapping: {module} -> {new_module}")
                     try:
                         # Try to import the new module path
@@ -356,10 +375,16 @@ def write_generator_result(save_path: str, num_scenarios: int, metrics: dict):
     for key, values in metrics.items():
         if values:
             # Handle both numpy arrays and regular values.
-            metrics_mean[key] = np.mean([val.item() if isinstance(val, np.ndarray) else val for val in values])
+            metrics_mean[key] = np.mean(
+                [val.item() if isinstance(val, np.ndarray) else val for val in values]
+            )
 
     # Add derived metrics.
-    if "accuracy" in metrics_mean and "overlap" in metrics_mean and "at_fault_collision" in metrics_mean:
+    if (
+        "accuracy" in metrics_mean
+        and "overlap" in metrics_mean
+        and "at_fault_collision" in metrics_mean
+    ):
         metrics_mean["accuracy_only_at_fault"] = metrics_mean["accuracy"] + (
             metrics_mean["overlap"] - metrics_mean["at_fault_collision"]
         )
@@ -384,7 +409,9 @@ def plot_scene(env, env_transition, sdc_pov: bool):
     if sdc_pov:
         return visualization.plot_input_agent(env_transition.state, env, batch_idx=0)
     else:
-        return overrides.plot_simulator_state(env_transition.state, use_log_traj=False, batch_idx=0)
+        return overrides.plot_simulator_state(
+            env_transition.state, use_log_traj=False, batch_idx=0
+        )
 
 
 def _process_metric(key, value, operand, batch_index, steps, eval_metrics, batch_metrics):

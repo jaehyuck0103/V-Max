@@ -166,8 +166,12 @@ def make_networks(
 
     output_size = parametric_action_distribution.param_size
 
-    policy_network = networks.make_policy_network(network_config, observation_size, output_size, unflatten_fn)
-    value_network = networks.make_value_network(network_config, observation_size, action_size, unflatten_fn)
+    policy_network = networks.make_policy_network(
+        network_config, observation_size, output_size, unflatten_fn
+    )
+    value_network = networks.make_value_network(
+        network_config, observation_size, action_size, unflatten_fn
+    )
 
     rl_policy_optimizer = optax.adam(rl_learning_rate)
     value_optimizer = optax.adam(rl_learning_rate)
@@ -184,7 +188,9 @@ def make_networks(
     )
 
 
-def make_rl_sgd_step(bc_sac_network: BCSACNetworks, alpha: float, discount: float, tau: float) -> callable:
+def make_rl_sgd_step(
+    bc_sac_network: BCSACNetworks, alpha: float, discount: float, tau: float
+) -> callable:
     """Create the SGD step function for RL training.
 
     Args:
@@ -197,10 +203,16 @@ def make_rl_sgd_step(bc_sac_network: BCSACNetworks, alpha: float, discount: floa
         A function that performs one SGD step for reinforcement learning.
 
     """
-    value_loss, policy_loss = _make_rl_losses(bc_sac_network=bc_sac_network, alpha=alpha, discount=discount)
+    value_loss, policy_loss = _make_rl_losses(
+        bc_sac_network=bc_sac_network, alpha=alpha, discount=discount
+    )
 
-    policy_update = networks.gradient_update_fn(policy_loss, bc_sac_network.rl_policy_optimizer, pmap_axis_name="batch")
-    value_update = networks.gradient_update_fn(value_loss, bc_sac_network.value_optimizer, pmap_axis_name="batch")
+    policy_update = networks.gradient_update_fn(
+        policy_loss, bc_sac_network.rl_policy_optimizer, pmap_axis_name="batch"
+    )
+    value_update = networks.gradient_update_fn(
+        value_loss, bc_sac_network.value_optimizer, pmap_axis_name="batch"
+    )
 
     def sgd_step(
         carry: tuple[BCSACTrainingState, jax.Array],
@@ -299,7 +311,9 @@ def make_imitation_sgd_step(bc_sac_network: BCSACNetworks, loss_type: str) -> ca
     return sgd_step
 
 
-def _make_rl_losses(bc_sac_network: BCSACNetworks, alpha: float, discount: float) -> tuple[callable, callable]:
+def _make_rl_losses(
+    bc_sac_network: BCSACNetworks, alpha: float, discount: float
+) -> tuple[callable, callable]:
     """Generate the loss functions for RL training.
 
     Args:
@@ -322,17 +336,25 @@ def _make_rl_losses(bc_sac_network: BCSACNetworks, alpha: float, discount: float
         transitions: datatypes.RLTransition,
         key: jax.Array,
     ) -> jax.Array:
-        value_old_action = value_network.apply(value_params, transitions.observation, transitions.action)
+        value_old_action = value_network.apply(
+            value_params, transitions.observation, transitions.action
+        )
         next_dist_params = policy_network.apply(policy_params, transitions.next_observation)
 
-        next_action = parametric_action_distribution.sample_no_postprocessing(next_dist_params, key)
+        next_action = parametric_action_distribution.sample_no_postprocessing(
+            next_dist_params, key
+        )
         next_log_prob = parametric_action_distribution.log_prob(next_dist_params, next_action)
         next_action = parametric_action_distribution.postprocess(next_action)
 
-        next_value = value_network.apply(target_value_params, transitions.next_observation, next_action)
+        next_value = value_network.apply(
+            target_value_params, transitions.next_observation, next_action
+        )
         next_v = jnp.min(next_value, axis=-1) - alpha * next_log_prob
 
-        target_value = jax.lax.stop_gradient(transitions.reward + transitions.flag * discount * next_v)
+        target_value = jax.lax.stop_gradient(
+            transitions.reward + transitions.flag * discount * next_v
+        )
         value_error = value_old_action - jnp.expand_dims(target_value, -1)
         value_loss = 0.5 * jnp.mean(jnp.square(value_error))
 

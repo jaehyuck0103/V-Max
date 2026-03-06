@@ -22,7 +22,9 @@ def select_action(observation: jax.Array, time_horizon: float = 8.0):
         The selected action.
 
     """
-    unroll, new_speed, accel_action, _, _, _, danger, _, _ = generate_unrolls(observation, time_horizon=time_horizon)
+    unroll, new_speed, accel_action, _, _, _, danger, _, _ = generate_unrolls(
+        observation, time_horizon=time_horizon
+    )
 
     next_x, next_y = unroll[1]
 
@@ -99,7 +101,9 @@ def generate_unrolls(observation: jax.Array, time_horizon: float = 8.0):
 
         return idm.generate_unroll(obs, time_horizon=time_horizon)
 
-    target_paths = jnp.array([gps_target, generate_offset_path(gps_target, 1), generate_offset_path(gps_target, -1)])
+    target_paths = jnp.array(
+        [gps_target, generate_offset_path(gps_target, 1), generate_offset_path(gps_target, -1)]
+    )
 
     target_speeds = jnp.arange(start=0.2, stop=1.2, step=0.2) * desired_speed
 
@@ -116,12 +120,16 @@ def generate_unrolls(observation: jax.Array, time_horizon: float = 8.0):
         batched_target_speeds,
     )
 
-    speed_scores = (new_speeds - jnp.min(new_speeds)) / (jnp.max(new_speeds) - jnp.min(new_speeds) + 1e-6)
+    speed_scores = (new_speeds - jnp.min(new_speeds)) / (
+        jnp.max(new_speeds) - jnp.min(new_speeds) + 1e-6
+    )
     speed_scores == speed_scores**2
 
     center_bonus = jnp.where(jnp.arange(num_speeds * num_paths) < num_speeds, 1, 0)
 
-    simulate_bicycle = functools.partial(simulate_trajectory_bicycle, sdc_vel_x=sdc_vel_x, sdc_vel_y=sdc_vel_y)
+    simulate_bicycle = functools.partial(
+        simulate_trajectory_bicycle, sdc_vel_x=sdc_vel_x, sdc_vel_y=sdc_vel_y
+    )
 
     simulate_bicycle_vmap = jax.vmap(simulate_bicycle, in_axes=(0, 0))
 
@@ -147,7 +155,9 @@ def generate_unrolls(observation: jax.Array, time_horizon: float = 8.0):
 
     safe_speed_scores = jnp.where(other_agents_ttc <= 5.0, 0, speed_scores)
 
-    offroad_ttc_scores = compute_offroad_score(simulated_trajectories, sim_yaws, sdc_features, roadgraph_points)
+    offroad_ttc_scores = compute_offroad_score(
+        simulated_trajectories, sim_yaws, sdc_features, roadgraph_points
+    )
     offroad_ttc_scores = jnp.clip(offroad_ttc_scores, 0, 4.0)
     offroad_penalty = (offroad_ttc_scores < 2.0).astype(float)
 
@@ -218,7 +228,9 @@ def simulate_trajectory_bicycle(trajectory, new_speed, sdc_vel_x, sdc_vel_y):
 
         accel, steering = backward(x, y, vel_x, vel_y, yaw, target_x, target_y, target_speed)
 
-        new_x, new_y, new_vel_x, new_vel_y, new_yaw = forward(x, y, vel_x, vel_y, yaw, accel, steering)
+        new_x, new_y, new_vel_x, new_vel_y, new_yaw = forward(
+            x, y, vel_x, vel_y, yaw, accel, steering
+        )
 
         next_carry = (new_x, new_y, new_vel_x, new_vel_y, new_yaw)
         output = next_carry
@@ -372,7 +384,10 @@ def collision_with_other_agents(
         in_axes=(0, None),
     )
 
-    all_collisions = check_collision(sdc_trajectories, other_agents_trajectories) * other_agents_valid[None, :, None]
+    all_collisions = (
+        check_collision(sdc_trajectories, other_agents_trajectories)
+        * other_agents_valid[None, :, None]
+    )
 
     collisions = jnp.any(all_collisions, axis=1)
 
@@ -395,7 +410,9 @@ def collision_with_other_agents(
 
     ttc_front = first_frontal_collision * constants.TIME_DELTA
 
-    ttc_front = jnp.where(is_frontal_colliding, ttc_front, (num_timesteps - 1) * constants.TIME_DELTA)
+    ttc_front = jnp.where(
+        is_frontal_colliding, ttc_front, (num_timesteps - 1) * constants.TIME_DELTA
+    )
 
     danger = jnp.max(ttc_front) < 2
 

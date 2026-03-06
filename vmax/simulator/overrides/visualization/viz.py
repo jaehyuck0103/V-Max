@@ -28,7 +28,6 @@ from waymax.visualization import viz as waymax_viz
 
 from vmax.simulator import overrides
 
-
 # The type ids for road graph elements that will be plot in visualization.
 # Please refer to color.py for definition and color associcated.
 _RoadGraphShown = (1, 2, 3, 15, 16, 17, 18, 19)
@@ -75,7 +74,9 @@ def _plot_bounding_boxes(
     # Past trajectories of SDC
     overrides.plot_numpy_bounding_boxes(
         ax=ax,
-        bboxes=traj_5dof[(time_indices < time_idx) & (time_idx - time_indices < 20) & valid_controlled],
+        bboxes=traj_5dof[
+            (time_indices < time_idx) & (time_idx - time_indices < 20) & valid_controlled
+        ],
         color=np.array([255, 192, 203]) / 255.0,  # np.random.choice(range(256), size=3) / 255.0,
         as_center_pts=True,
         alpha=0.4,
@@ -98,7 +99,9 @@ def _plot_bounding_boxes(
         # Past trajectories of surrounding objects & SDC
         overrides.plot_numpy_bounding_boxes(
             ax=ax,
-            bboxes=traj_5dof[(time_indices < time_idx) & (time_idx - time_indices < 20) & valid_tracked_obj],
+            bboxes=traj_5dof[
+                (time_indices < time_idx) & (time_idx - time_indices < 20) & valid_tracked_obj
+            ],
             color=obj_color,
             as_center_pts=True,
             alpha=0.5,
@@ -248,7 +251,9 @@ def plot_simulator_state(
     if state.shape:
         raise ValueError(f"Expecting 0 batch dimension, got {len(state.shape)}")
 
-    viz_config = waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    viz_config = (
+        waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    )
 
     create_fig = ax is None
 
@@ -338,7 +343,9 @@ def plot_observation(
     if obs.shape:
         raise ValueError(f"Expecting shape () for obs, got {obs.shape}")
 
-    viz_config = waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    viz_config = (
+        waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    )
 
     create_fig = ax is None
 

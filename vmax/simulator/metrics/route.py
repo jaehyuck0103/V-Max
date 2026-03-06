@@ -38,7 +38,9 @@ class OffRouteMetric(abstract_metric.AbstractMetric):
     """
 
     MAX_DISTANCE_TO_ROUTE_PATH = utils.LANE_WIDTH / 2 + utils.MARGIN  # Meters.
-    MAX_RELATIVE_DISTANCE_TO_OFF_ROUTE_PATH = MAX_DISTANCE_TO_ROUTE_PATH / 2 + utils.MARGIN  # Meters.
+    MAX_RELATIVE_DISTANCE_TO_OFF_ROUTE_PATH = (
+        MAX_DISTANCE_TO_ROUTE_PATH / 2 + utils.MARGIN
+    )  # Meters.
 
     def compute(self, simulator_state: datatypes.SimulatorState) -> abstract_metric.MetricResult:
         """Computes the off route metric.
@@ -92,15 +94,27 @@ class OffRouteMetric(abstract_metric.AbstractMetric):
         # Set distances to invalid paths to inf.
         sdc_dist_to_valid_paths = jnp.where(sdc_paths.valid, sdc_dist_to_paths, jnp.inf)
         # Set distances to invalid SDC states to inf.
-        sdc_dist_to_valid_paths = jnp.where(jnp.expand_dims(sdc_valid, (-1, -2)), sdc_dist_to_valid_paths, jnp.inf)
-        sdc_dist_to_valid_on_route_paths = jnp.where(sdc_paths.on_route, sdc_dist_to_valid_paths, jnp.inf)
-        sdc_dist_to_valid_off_route_paths = jnp.where(~sdc_paths.on_route, sdc_dist_to_valid_paths, jnp.inf)
+        sdc_dist_to_valid_paths = jnp.where(
+            jnp.expand_dims(sdc_valid, (-1, -2)), sdc_dist_to_valid_paths, jnp.inf
+        )
+        sdc_dist_to_valid_on_route_paths = jnp.where(
+            sdc_paths.on_route, sdc_dist_to_valid_paths, jnp.inf
+        )
+        sdc_dist_to_valid_off_route_paths = jnp.where(
+            ~sdc_paths.on_route, sdc_dist_to_valid_paths, jnp.inf
+        )
 
         # Shape: (...)
-        min_sdc_dist_to_valid_on_route_paths = jnp.min(sdc_dist_to_valid_on_route_paths, axis=(-1, -2))
-        min_sdc_dist_to_valid_off_route_paths = jnp.min(sdc_dist_to_valid_off_route_paths, axis=(-1, -2))
+        min_sdc_dist_to_valid_on_route_paths = jnp.min(
+            sdc_dist_to_valid_on_route_paths, axis=(-1, -2)
+        )
+        min_sdc_dist_to_valid_off_route_paths = jnp.min(
+            sdc_dist_to_valid_off_route_paths, axis=(-1, -2)
+        )
 
-        sdc_off_route = (min_sdc_dist_to_valid_on_route_paths > self.MAX_DISTANCE_TO_ROUTE_PATH) | (
+        sdc_off_route = (
+            min_sdc_dist_to_valid_on_route_paths > self.MAX_DISTANCE_TO_ROUTE_PATH
+        ) | (
             min_sdc_dist_to_valid_on_route_paths - min_sdc_dist_to_valid_off_route_paths
             > self.MAX_RELATIVE_DISTANCE_TO_OFF_ROUTE_PATH
         )

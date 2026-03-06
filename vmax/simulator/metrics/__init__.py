@@ -13,9 +13,11 @@ from .on_multiple_lanes import OnMultipleLanesMetric
 from .progress_ratio import ProgressRatioMetric
 from .red_light import RunRedLightMetric, get_id_red_for_sdc
 from .route import OffRouteMetric
-from .speed_limit import SpeedLimitViolationMetric, infer_speed_limit_from_simulator_state
+from .speed_limit import (
+    SpeedLimitViolationMetric,
+    infer_speed_limit_from_simulator_state,
+)
 from .ttc import TimeToCollisionMetric
-
 
 __all__ = [
     "AtFaultCollisionMetric",

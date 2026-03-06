@@ -19,7 +19,9 @@ class Wrapper(waymax_env.PlanningAgentEnvironment):
     def metrics(self, state: datatypes.SimulatorState) -> types.Metrics:
         return self.env.metrics(state)
 
-    def reset(self, state: datatypes.SimulatorState, rng: jax.Array | None = None) -> datatypes.SimulatorState:
+    def reset(
+        self, state: datatypes.SimulatorState, rng: jax.Array | None = None
+    ) -> datatypes.SimulatorState:
         return self.env.reset(state, rng)
 
     def observe(self, state: datatypes.SimulatorState) -> types.Observation:

@@ -8,7 +8,6 @@ from waymax import datatypes
 
 from vmax.simulator import operations, wrappers
 
-
 MAX_ITER_SAMPLE = 8
 # Magic number to tune more? episode starts in a termination condition around 15% of time
 PROB_MAKE_STRONG_NOISY_START = 0.75
@@ -25,7 +24,9 @@ LOW_SPEED = 0
 class NoisyInitWrapper(wrappers.Wrapper):
     """Wrapper to apply noise to initial actions during reset."""
 
-    def reset(self, state: datatypes.SimulatorState, rng: jax.Array | None = None) -> "wrappers.EnvTransition":
+    def reset(
+        self, state: datatypes.SimulatorState, rng: jax.Array | None = None
+    ) -> "wrappers.EnvTransition":
         """Reset the environment using noisy initial actions.
 
         Args:
@@ -42,7 +43,9 @@ class NoisyInitWrapper(wrappers.Wrapper):
             _, noisy_state, _, nb_iter = carry
             return jnp.logical_and(noisy_state.done, nb_iter < MAX_ITER_SAMPLE)
 
-        state, noisy_state, rng_key, nb_iter = self._sample_noisy_initial_action((state, state, rng, 0))
+        state, noisy_state, rng_key, nb_iter = self._sample_noisy_initial_action(
+            (state, state, rng, 0)
+        )
 
         state, noisy_state, _, _ = jax.lax.while_loop(
             is_noisy_state_corrupted,
@@ -79,8 +82,16 @@ class NoisyInitWrapper(wrappers.Wrapper):
         )
         arr_bounds = jnp.array(
             [
-                [current_bound_steer * FACTOR_NOISY_START, current_bound_steer, BOUND_ACCEL_MAX * FACTOR_NOISY_START],
-                [-current_bound_steer, -current_bound_steer * FACTOR_NOISY_START, BOUND_ACCEL_MAX * FACTOR_NOISY_START],
+                [
+                    current_bound_steer * FACTOR_NOISY_START,
+                    current_bound_steer,
+                    BOUND_ACCEL_MAX * FACTOR_NOISY_START,
+                ],
+                [
+                    -current_bound_steer,
+                    -current_bound_steer * FACTOR_NOISY_START,
+                    BOUND_ACCEL_MAX * FACTOR_NOISY_START,
+                ],
                 [0, current_bound_steer, 0],
                 [-current_bound_steer, 0, 0],
             ],
@@ -98,12 +109,18 @@ class NoisyInitWrapper(wrappers.Wrapper):
         rng_key, subkey_steer = jax.random.split(rng_key)
 
         # Sample accel and steer uniformly on the predefined interval
-        action_accel = jax.random.uniform(key=subkey_accel, shape=(1,), minval=bound_accel_min, maxval=BOUND_ACCEL_MAX)
-        action_steer = jax.random.uniform(key=subkey_steer, shape=(1,), minval=bound_steer_min, maxval=bound_steer_max)
+        action_accel = jax.random.uniform(
+            key=subkey_accel, shape=(1,), minval=bound_accel_min, maxval=BOUND_ACCEL_MAX
+        )
+        action_steer = jax.random.uniform(
+            key=subkey_steer, shape=(1,), minval=bound_steer_min, maxval=bound_steer_max
+        )
 
         actions = jnp.concat([action_accel, action_steer])
         # actions = jnp.expand_dims(actions, axis=0) # TO ADD in EVAL
-        actions = datatypes.Action(data=actions, valid=jnp.ones_like(actions[..., 0:1], dtype=jnp.bool_))
+        actions = datatypes.Action(
+            data=actions, valid=jnp.ones_like(actions[..., 0:1], dtype=jnp.bool_)
+        )
         actions.validate()
 
         history_length = 10  # TODO3 replace with historic length config? Suppose history = 10

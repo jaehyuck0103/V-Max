@@ -20,7 +20,9 @@ from jax import numpy as jnp
 from waymax import datatypes
 
 
-def filter_sdc_paths(sdc_paths: datatypes.Paths, reference_points: jax.Array, num_points: int) -> datatypes.Paths:
+def filter_sdc_paths(
+    sdc_paths: datatypes.Paths, reference_points: jax.Array, num_points: int
+) -> datatypes.Paths:
     """Returns the `num_points` ahead of the reference point in the SDC paths.
 
     Args:

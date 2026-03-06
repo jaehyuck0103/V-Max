@@ -20,7 +20,6 @@ from .reward import RewardCustomWrapper, RewardLinearWrapper
 from .state.noisy_init import NoisyInitWrapper
 from .state.sdc_path import SDCPathWrapper
 
-
 __all__ = [
     # Interfaces
     "AutoResetWrapper",

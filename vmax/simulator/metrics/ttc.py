@@ -12,7 +12,6 @@ from waymax.utils import geometry
 from vmax.simulator import constants, operations
 from vmax.simulator.metrics import utils
 
-
 _TIME_HORIZON = 5.0  # seconds
 
 
@@ -37,7 +36,9 @@ class TimeToCollisionMetric(abstract_metric.AbstractMetric):
         )
         sdc_index = operations.get_index(simulator_state.object_metadata.is_sdc)
 
-        ttc, valid = self._compute_ttc(current_traj, sdc_index, dt=constants.TIME_DELTA, time_horizon=_TIME_HORIZON)
+        ttc, valid = self._compute_ttc(
+            current_traj, sdc_index, dt=constants.TIME_DELTA, time_horizon=_TIME_HORIZON
+        )
         is_ahead = self._only_ahead_agents(current_traj, sdc_index)
 
         ttc = jnp.where(is_ahead, ttc, _TIME_HORIZON)

@@ -154,7 +154,12 @@ class NormalTanhDistribution(ParametricDistribution):
         # which would make log_prob computations impossible. Instead, most
         # of the code operate on pre-tanh actions and we take the postprocessor
         # jacobian into account in log_prob computations.
-        super().__init__(param_size=2 * event_size, postprocessor=TanhBijector(), event_ndims=1, reparametrizable=True)
+        super().__init__(
+            param_size=2 * event_size,
+            postprocessor=TanhBijector(),
+            event_ndims=1,
+            reparametrizable=True,
+        )
         self._min_std = min_std
 
     def create_dist(self, parameters):

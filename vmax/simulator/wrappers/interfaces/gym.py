@@ -215,8 +215,12 @@ class GymWrapper(Wrapper, gym.Env):
 
         action = jnp.asarray(action)
         # Reshape the action to what the underlying environment wants.
-        action = jnp.reshape(action, self._cur_state.shape + self.stateless_env.action_spec().data.shape)
-        action = datatypes.Action(data=action, valid=jnp.ones_like(action[..., 0:1], dtype=jnp.bool_))
+        action = jnp.reshape(
+            action, self._cur_state.shape + self.stateless_env.action_spec().data.shape
+        )
+        action = datatypes.Action(
+            data=action, valid=jnp.ones_like(action[..., 0:1], dtype=jnp.bool_)
+        )
         action.validate()
         self._cur_state = self._jitted_stateless_env_step(self._cur_state, action)
 

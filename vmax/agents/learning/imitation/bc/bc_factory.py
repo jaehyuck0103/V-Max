@@ -130,7 +130,9 @@ def make_networks(
         An instance of BCNetwork.
 
     """
-    policy_network = networks.make_policy_network(network_config, observation_size, action_size, unflatten_fn)
+    policy_network = networks.make_policy_network(
+        network_config, observation_size, action_size, unflatten_fn
+    )
     optimizer = optax.adam(learning_rate=learning_rate)
 
     return BCNetwork(policy_network=policy_network, optimizer=optimizer)
@@ -148,7 +150,9 @@ def make_sgd_step(bc_network: BCNetwork, loss_type: str) -> datatypes.LearningFu
 
     """
     policy_loss = _make_loss_fn(bc_network, loss_type)
-    policy_update = networks.gradient_update_fn(policy_loss, bc_network.optimizer, pmap_axis_name="batch")
+    policy_update = networks.gradient_update_fn(
+        policy_loss, bc_network.optimizer, pmap_axis_name="batch"
+    )
 
     def sgd_step(
         carry: tuple[BCTrainingState, jax.Array],
@@ -190,7 +194,9 @@ def _make_loss_fn(bc_network: BCNetwork, loss_type: str):
     """
     policy_network = bc_network.policy_network
 
-    def compute_policy_loss(policy_params: datatypes.Params, transitions: datatypes.RLTransition) -> jax.Array:
+    def compute_policy_loss(
+        policy_params: datatypes.Params, transitions: datatypes.RLTransition
+    ) -> jax.Array:
         action = policy_network.apply(policy_params, transitions.observation)
 
         if loss_type == "mse":

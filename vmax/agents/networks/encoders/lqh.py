@@ -127,7 +127,9 @@ class LQHEncoder(nn.Module):
         """
         features, masks = self.unflatten_fn(obs)
 
-        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = features
+        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = (
+            features
+        )
         sdc_traj_valid_mask, other_traj_valid_mask, rg_valid_mask, tl_valid_mask = masks
 
         num_objects, timestep_agents = other_traj_features.shape[-3:-1]
@@ -173,14 +175,22 @@ class LQHEncoder(nn.Module):
         )
 
         # Positional Encoding
-        sdc_traj_encoding += jnp.expand_dims(self.param("sdc_traj_pe", init.normal(), (1, timestep_agents, self.dk)), 0)
+        sdc_traj_encoding += jnp.expand_dims(
+            self.param("sdc_traj_pe", init.normal(), (1, timestep_agents, self.dk)), 0
+        )
         other_traj_encoding += jnp.expand_dims(
             self.param("other_traj_pe", init.normal(), (num_objects, timestep_agents, self.dk)),
             0,
         )
-        rg_encoding += jnp.expand_dims(self.param("rg_pe", init.normal(), (num_roadgraph, self.dk)), 0)
-        tl_encoding += jnp.expand_dims(self.param("tj_pe", init.normal(), (num_light, timestep_tl, self.dk)), 0)
-        gps_path_encoding += jnp.expand_dims(self.param("gps_path_pe", init.normal(), (target_len, self.dk)), 0)
+        rg_encoding += jnp.expand_dims(
+            self.param("rg_pe", init.normal(), (num_roadgraph, self.dk)), 0
+        )
+        tl_encoding += jnp.expand_dims(
+            self.param("tj_pe", init.normal(), (num_light, timestep_tl, self.dk)), 0
+        )
+        gps_path_encoding += jnp.expand_dims(
+            self.param("gps_path_pe", init.normal(), (target_len, self.dk)), 0
+        )
 
         # Flatten by NumAgent NumObsTS , Feature_dim
         sdc_traj_encoding = einops.rearrange(sdc_traj_encoding, "b n t d -> b (n t) d")
@@ -192,7 +202,13 @@ class LQHEncoder(nn.Module):
         other_traj_valid_mask = einops.rearrange(other_traj_valid_mask, "b n t -> b (n t)")
         tl_valid_mask = einops.rearrange(tl_valid_mask, "b n t -> b (n t)")
 
-        inputs = [sdc_traj_encoding, other_traj_encoding, rg_encoding, tl_encoding, gps_path_encoding]
+        inputs = [
+            sdc_traj_encoding,
+            other_traj_encoding,
+            rg_encoding,
+            tl_encoding,
+            gps_path_encoding,
+        ]
         masks = [sdc_traj_valid_mask, other_traj_valid_mask, rg_valid_mask, tl_valid_mask, None]
 
         output = LQHAttention(

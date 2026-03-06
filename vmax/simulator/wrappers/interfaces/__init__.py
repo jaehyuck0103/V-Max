@@ -6,7 +6,6 @@ from .brax import AutoResetWrapper, BraxWrapper, EnvTransition, VmapWrapper
 from .gym import GymWrapper
 from .multi_agent import MultiAgentBraxWrapper
 
-
 __all__ = [
     "AutoResetWrapper",
     "BraxWrapper",

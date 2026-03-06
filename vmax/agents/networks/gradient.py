@@ -21,7 +21,9 @@ import jax
 import optax
 
 
-def loss_and_pgrad(loss_fn: Callable[..., float], pmap_axis_name: str | None, has_aux: bool = False):
+def loss_and_pgrad(
+    loss_fn: Callable[..., float], pmap_axis_name: str | None, has_aux: bool = False
+):
     """Compute the loss and averaged gradients of the loss function.
 
     Args:

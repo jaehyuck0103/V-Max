@@ -2,14 +2,19 @@
 
 """Encoders module."""
 
-from .attention_utils import AttentionLayer, FeedForward, LocalAttentionLayer, ReZero, nearest_neighbors_jax
+from .attention_utils import (
+    AttentionLayer,
+    FeedForward,
+    LocalAttentionLayer,
+    ReZero,
+    nearest_neighbors_jax,
+)
 from .embedding_utils import build_mlp_embedding
 from .lq import LQEncoder
 from .lqh import LQHEncoder
 from .mlp import MLPEncoder
 from .mtr import MTREncoder
 from .wayformer import WayformerEncoder
-
 
 Encoder = MLPEncoder | LQEncoder | WayformerEncoder | MTREncoder | LQHEncoder
 

@@ -67,11 +67,15 @@ class MTRAttention(nn.Module):
         )
         ff = partial(encoders.FeedForward, mult=self.ff_mult, dropout=self.ff_dropout)
 
-        knn = jax.vmap(lambda x, y, mask_y=None: encoders.nearest_neighbors_jax(x, y, self.k, mask_y))
+        knn = jax.vmap(
+            lambda x, y, mask_y=None: encoders.nearest_neighbors_jax(x, y, self.k, mask_y)
+        )
 
         index_pairs = knn(latent, x, mask_y=mask_x)
         rz = encoders.ReZero(name="rezero_0")
-        latent += rz(attn(name="attn_0")(latent, x, index_pairs, mask_q=mask_latent, mask_k=mask_x))
+        latent += rz(
+            attn(name="attn_0")(latent, x, index_pairs, mask_q=mask_latent, mask_k=mask_x)
+        )
 
         for i in range(1, self.depth):
             rz = encoders.ReZero(name=f"rezero_{i}")
@@ -129,7 +133,9 @@ class MTREncoder(nn.Module):
         """
         features, masks = self.unflatten_fn(obs)
 
-        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = features
+        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = (
+            features
+        )
         sdc_traj_valid_mask, other_traj_valid_mask, rg_valid_mask, tl_valid_mask = masks
 
         num_objects = other_traj_features.shape[-3]
@@ -179,14 +185,18 @@ class MTREncoder(nn.Module):
         sdc_traj_encoding = nn.max_pool(
             sdc_traj_encoding - jnp.inf * ~jnp.expand_dims(sdc_traj_valid_mask, -1),
             (1, 1, sdc_traj_encoding.shape[2]),
-        ).squeeze(2)  # [B,N,D]
+        ).squeeze(
+            2
+        )  # [B,N,D]
         sdc_traj_encoding = jnp.where(sdc_traj_encoding == -jnp.inf, 0, sdc_traj_encoding)
         sdc_traj_valid_mask = jnp.max(sdc_traj_valid_mask, axis=-1)  # [B,N]
 
         other_traj_encoding = nn.max_pool(
             other_traj_encoding - jnp.inf * ~jnp.expand_dims(other_traj_valid_mask, -1),
             (1, 1, other_traj_encoding.shape[2]),
-        ).squeeze(2)  # [B,N,D]
+        ).squeeze(
+            2
+        )  # [B,N,D]
         other_traj_encoding = jnp.where(other_traj_encoding == -jnp.inf, 0, other_traj_encoding)
         other_traj_valid_mask = jnp.max(other_traj_valid_mask, axis=-1)  # [B,N]
 
@@ -196,16 +206,26 @@ class MTREncoder(nn.Module):
         tl_encoding = nn.max_pool(
             tl_encoding - jnp.inf * ~jnp.expand_dims(tl_valid_mask, -1),
             (1, 1, tl_encoding.shape[2]),
-        ).squeeze(2)  # [B,N,D]
+        ).squeeze(
+            2
+        )  # [B,N,D]
         tl_encoding = jnp.where(tl_encoding == -jnp.inf, 0, tl_encoding)
         tl_valid_mask = jnp.max(tl_valid_mask, axis=-1)  # [B,N]
 
         # Positional Encoding
-        sdc_traj_encoding += jnp.expand_dims(self.param("sdc_traj_pe", init.normal(), (1, self.dk)), 0)
-        other_traj_encoding += jnp.expand_dims(self.param("other_traj_pe", init.normal(), (num_objects, self.dk)), 0)
-        rg_encoding += jnp.expand_dims(self.param("rg_pe", init.normal(), (num_roadgraph, self.dk)), 0)
+        sdc_traj_encoding += jnp.expand_dims(
+            self.param("sdc_traj_pe", init.normal(), (1, self.dk)), 0
+        )
+        other_traj_encoding += jnp.expand_dims(
+            self.param("other_traj_pe", init.normal(), (num_objects, self.dk)), 0
+        )
+        rg_encoding += jnp.expand_dims(
+            self.param("rg_pe", init.normal(), (num_roadgraph, self.dk)), 0
+        )
         tl_encoding += jnp.expand_dims(self.param("tl_pe", init.normal(), (num_light, self.dk)), 0)
-        gps_path_encoding += jnp.expand_dims(self.param("gps_path_pe", init.normal(), (target_len, self.dk)), 0)
+        gps_path_encoding += jnp.expand_dims(
+            self.param("gps_path_pe", init.normal(), (target_len, self.dk)), 0
+        )
 
         # Mask for gps path target
         gps_path_valid_mask = jnp.ones(gps_path_encoding.shape[:-1]).astype(bool)

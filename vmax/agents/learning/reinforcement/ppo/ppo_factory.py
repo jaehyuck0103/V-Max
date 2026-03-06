@@ -108,13 +108,17 @@ def make_inference_fn(ppo_networks: PPONetworks) -> datatypes.Policy:
         policy_network = ppo_networks.policy_network
         parametric_action_distribution = ppo_networks.parametric_action_distribution
 
-        def policy(observations: jax.Array, key_sample: jax.Array = None) -> tuple[jax.Array, dict]:
+        def policy(
+            observations: jax.Array, key_sample: jax.Array = None
+        ) -> tuple[jax.Array, dict]:
             logits = policy_network.apply(params, observations)
 
             if deterministic:
                 return parametric_action_distribution.mode(logits), {}
 
-            raw_actions = parametric_action_distribution.sample_no_postprocessing(logits, key_sample)
+            raw_actions = parametric_action_distribution.sample_no_postprocessing(
+                logits, key_sample
+            )
 
             log_prob = parametric_action_distribution.log_prob(logits, raw_actions)
             postprocessed_actions = parametric_action_distribution.postprocess(raw_actions)
@@ -153,7 +157,9 @@ def make_networks(
 
     output_size = parametric_action_distribution.param_size
 
-    policy_network = networks.make_policy_network(network_config, observation_size, output_size, unflatten_fn)
+    policy_network = networks.make_policy_network(
+        network_config, observation_size, output_size, unflatten_fn
+    )
     value_network = networks.make_value_network(
         network_config,
         observation_size,
@@ -210,7 +216,9 @@ def make_sgd_step(
         entropy_coef,
         normalize_advantages,
     )
-    ppo_update = networks.gradient_update_fn(ppo_loss, ppo_network.optimizer, pmap_axis_name="batch", has_aux=True)
+    ppo_update = networks.gradient_update_fn(
+        ppo_loss, ppo_network.optimizer, pmap_axis_name="batch", has_aux=True
+    )
 
     def sgd_step(
         carry: tuple[PPOTrainingState, jax.Array],
@@ -305,7 +313,9 @@ def _make_loss_fn(
         baseline = value_apply(params.value, obs).squeeze(-1)
 
         # Unflatten the batch dimension
-        policy_logits = jnp.reshape(policy_logits, (data.observation.shape[0], -1) + policy_logits.shape[1:])
+        policy_logits = jnp.reshape(
+            policy_logits, (data.observation.shape[0], -1) + policy_logits.shape[1:]
+        )
         baseline = jnp.reshape(baseline, (data.observation.shape[0], -1))
 
         bootstrap_value = value_apply(params.value, data.next_observation[-1]).squeeze(-1)

@@ -10,10 +10,14 @@ def final(x):
     return x[-1]
 
 
-def nuplan_speed_compliance(speed_violation, dt=constants.TIME_DELTA, max_overspeed_value_threshold=2.23):
+def nuplan_speed_compliance(
+    speed_violation, dt=constants.TIME_DELTA, max_overspeed_value_threshold=2.23
+):
     # Implementation of nuPlan speed compliance score, based on duration and depth of the speed limit violations
     scenario_duration = dt * (len(speed_violation) - 1)
-    max_ov_threshold = max(max_overspeed_value_threshold, 1e-3)  # Safety if max_overspeed_value_threshold is set to 0
+    max_ov_threshold = max(
+        max_overspeed_value_threshold, 1e-3
+    )  # Safety if max_overspeed_value_threshold is set to 0
     if scenario_duration == 0:
         return 1.0
     violation_loss = dt * np.sum(speed_violation) / (max_ov_threshold * scenario_duration)

@@ -1,6 +1,5 @@
 import os
 
-
 os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
 
 
@@ -200,7 +199,9 @@ def run_evaluation(
             render_pov=render_pov,
         )
     else:
-        _run_scenario = partial(utils.run_scenario_jit, step_fn=jitted_step_fn, reset_fn=jitted_reset)
+        _run_scenario = partial(
+            utils.run_scenario_jit, step_fn=jitted_step_fn, reset_fn=jitted_reset
+        )
         _run_scenario = jax.vmap(_run_scenario)
         _run_scenario = jax.jit(_run_scenario)
 
@@ -254,7 +255,9 @@ def main():
     """Main evaluation function that sets up and runs the evaluation process."""
     eval_args = parse_eval_args()
 
-    print(f"-> Setting up evaluation for {eval_args.sdc_actor} policy on {eval_args.path_dataset} dataset...")
+    print(
+        f"-> Setting up evaluation for {eval_args.sdc_actor} policy on {eval_args.path_dataset} dataset..."
+    )
 
     if eval_args.plot_failures:
         print("-> Plotting failed scenarios from previous evaluation...")

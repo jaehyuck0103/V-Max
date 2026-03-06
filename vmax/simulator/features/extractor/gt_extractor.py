@@ -54,7 +54,13 @@ class GTFeaturesExtractor(extractor.VecFeaturesExtractor):
 
         path_target_features = self._build_target_features(state, sdc_observation)
 
-        return jnp.array(()), jnp.array(()), jnp.array(()), jnp.array(()), path_target_features.data
+        return (
+            jnp.array(()),
+            jnp.array(()),
+            jnp.array(()),
+            jnp.array(()),
+            path_target_features.data,
+        )
 
     def plot_features(self, state: datatypes.SimulatorState, ax: mpl.axes.Axes) -> None:
         """Plot the path target features on a given axis.
@@ -85,16 +91,22 @@ class GTFeaturesExtractor(extractor.VecFeaturesExtractor):
         len_dims = len(batch_dims)
 
         sdc_idx = operations.get_index(sdc_obs.is_ego)
-        sdc_log_xy = jnp.take_along_axis(simulator_state.log_trajectory.xy, sdc_idx[None, None, None], axis=len_dims)
+        sdc_log_xy = jnp.take_along_axis(
+            simulator_state.log_trajectory.xy, sdc_idx[None, None, None], axis=len_dims
+        )
 
         sdc_pose2d = sdc_obs.pose2d.matrix
-        sdc_log_xy = geometry.transform_points(pts=sdc_log_xy, pose_matrix=sdc_pose2d).squeeze(axis=0)
+        sdc_log_xy = geometry.transform_points(pts=sdc_log_xy, pose_matrix=sdc_pose2d).squeeze(
+            axis=0
+        )
 
         fill_value = sdc_log_xy[-1]
 
         indices = jnp.arange(self._num_target_path_points) + simulator_state.timestep
 
-        target = jnp.take_along_axis(sdc_log_xy, indices[:, None], axis=0, mode="fill", fill_value=-1)
+        target = jnp.take_along_axis(
+            sdc_log_xy, indices[:, None], axis=0, mode="fill", fill_value=-1
+        )
         target = jnp.where(target == -1, fill_value, target)
         target = extractor.normalize_path(target, self._max_meters)
 

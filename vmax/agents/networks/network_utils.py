@@ -7,7 +7,9 @@ from typing import Any
 from flax import linen as nn
 
 
-def parse_config(config: dict[str, Any], keys_to_remove: list[str] | None = None) -> dict[str, Any]:
+def parse_config(
+    config: dict[str, Any], keys_to_remove: list[str] | None = None
+) -> dict[str, Any]:
     """Parse a configuration dictionary.
 
     Args:
@@ -38,7 +40,8 @@ def convert_to_dict_with_activation_fn(config: dict[str, Any]) -> dict[str, Any]
         return value
 
     return {
-        key: get_activation_fn(value) if "activation" in key else convert_value(value) for key, value in config.items()
+        key: get_activation_fn(value) if "activation" in key else convert_value(value)
+        for key, value in config.items()
     }
 
 

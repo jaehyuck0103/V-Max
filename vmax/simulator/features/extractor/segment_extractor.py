@@ -42,7 +42,9 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         self._max_num_lanes = roadgraphs_config["max_num_lanes"]
         self._max_num_points_per_lane = roadgraphs_config["max_num_points_per_lane"]
 
-    def unflatten_features(self, vectorized_obs: jax.Array) -> tuple[tuple[jax.Array, ...], tuple[jax.Array, ...]]:
+    def unflatten_features(
+        self, vectorized_obs: jax.Array
+    ) -> tuple[tuple[jax.Array, ...], tuple[jax.Array, ...]]:
         """Unflatten a vectorized observation into features and masks.
 
         Args:
@@ -61,7 +63,9 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         path_target_feature_size = self.get_features_size(self._path_target_features_key)
 
         sdc_object_size = 1 * self._obs_past_num_steps * object_features_size
-        sdc_object_features = vectorized_obs[..., unflatten_size : unflatten_size + sdc_object_size]
+        sdc_object_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + sdc_object_size
+        ]
         sdc_object_features = sdc_object_features.reshape(
             *batch_dims,
             1,
@@ -70,8 +74,12 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         )
         unflatten_size += sdc_object_size
 
-        other_objects_size = self._num_closest_objects * self._obs_past_num_steps * object_features_size
-        other_objects_features = vectorized_obs[..., unflatten_size : unflatten_size + other_objects_size]
+        other_objects_size = (
+            self._num_closest_objects * self._obs_past_num_steps * object_features_size
+        )
+        other_objects_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + other_objects_size
+        ]
         other_objects_features = other_objects_features.reshape(
             *batch_dims,
             self._num_closest_objects,
@@ -98,7 +106,9 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         )
         unflatten_size += roadgraph_size
 
-        traffic_lights_features = vectorized_obs[..., unflatten_size : unflatten_size + traffic_lights_features_size]
+        traffic_lights_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + traffic_lights_features_size
+        ]
         traffic_lights_features = traffic_lights_features.reshape(
             *batch_dims,
             1,
@@ -108,7 +118,9 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         unflatten_size += traffic_lights_features_size
 
         path_target_size = self._num_target_path_points * path_target_feature_size
-        path_target_features = vectorized_obs[..., unflatten_size : unflatten_size + path_target_size]
+        path_target_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + path_target_size
+        ]
         path_target_features = path_target_features.reshape(
             *batch_dims,
             self._num_target_path_points,
@@ -116,7 +128,9 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         )
         unflatten_size += path_target_size
 
-        assert flatten_size == unflatten_size, f"Unflatten size {unflatten_size} does not match {flatten_size}"
+        assert (
+            flatten_size == unflatten_size
+        ), f"Unflatten size {unflatten_size} does not match {flatten_size}"
 
         features = (
             sdc_object_features[..., :-1],
@@ -173,16 +187,22 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         roadgraph_features.xy = sdc_frame_samples
 
         if "types" in self._roadgraph_features_key:
-            v_map__extract_lane_type_from_id = jax.vmap(_extract_lane_type_from_id, in_axes=(None, 0))
+            v_map__extract_lane_type_from_id = jax.vmap(
+                _extract_lane_type_from_id, in_axes=(None, 0)
+            )
             # (self._max_num_lanes,)
             rg_types = v_map__extract_lane_type_from_id(sdc_obs, closest_lane_ids)
             # (self._max_num_lanes, 8)
-            rg_types = extractor.normalize_by_feature(rg_types, "types", self._max_meters, self._dict_mapping)
+            rg_types = extractor.normalize_by_feature(
+                rg_types, "types", self._max_meters, self._dict_mapping
+            )
             # (self._max_num_lanes, self._max_num_points_per_lane * 2 + 8)
             roadgraph_features.types = rg_types
 
         if "dir_xy" in self._roadgraph_features_key:
-            v_map_get_direction_vector = jax.vmap(_get_direction_vector_from_sample, in_axes=(None, 0, 0))
+            v_map_get_direction_vector = jax.vmap(
+                _get_direction_vector_from_sample, in_axes=(None, 0, 0)
+            )
             # (self._max_num_lanes, self._max_num_points_per_lane, 2)
             directions = v_map_get_direction_vector(sdc_obs, samples, closest_lane_ids)
             # (self._max_num_lanes, self._max_num_points_per_lane * 2)
@@ -203,7 +223,9 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
 
         return roadgraph_features
 
-    def _build_traffic_lights_features(self, sdc_obs: datatypes.Observation) -> features.TrafficLightFeatures:
+    def _build_traffic_lights_features(
+        self, sdc_obs: datatypes.Observation
+    ) -> features.TrafficLightFeatures:
         """Build traffic light features using the current lane's observation.
 
         Args:
@@ -218,11 +240,15 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
 
         red_light_id = metrics.get_id_red_for_sdc(sdc_obs)
 
-        traffic_light_features = features.TrafficLightFeatures(field_names=self._traffic_lights_features_key)
+        traffic_light_features = features.TrafficLightFeatures(
+            field_names=self._traffic_lights_features_key
+        )
         for key in self._traffic_lights_features_key:
             feature = getattr(sdc_obs.traffic_lights, key)[red_light_id]
             feature = jnp.expand_dims(feature, axis=0)
-            feature = extractor.normalize_by_feature(feature, key, self._max_meters, self._dict_mapping)
+            feature = extractor.normalize_by_feature(
+                feature, key, self._max_meters, self._dict_mapping
+            )
 
             if feature.ndim == 2:
                 feature = jnp.expand_dims(feature, axis=-1)
@@ -232,7 +258,9 @@ class SegmentFeaturesExtractor(extractor.VecFeaturesExtractor):
         return traffic_light_features
 
 
-def _get_direction_vector_from_sample(sdc_obs: datatypes.Observation, sample: jax.Array, lane_id: int) -> jax.Array:
+def _get_direction_vector_from_sample(
+    sdc_obs: datatypes.Observation, sample: jax.Array, lane_id: int
+) -> jax.Array:
     """Compute the direction vector for a sample point on a lane.
 
     Args:
@@ -346,10 +374,14 @@ def _n_sample_from_lane(
     lane_rg_points_x = lane_rg_points[..., 0]
     lane_rg_points_y = lane_rg_points[..., 1]
 
-    distances = jnp.cumsum(jnp.sqrt(jnp.diff(lane_rg_points_x) ** 2 + jnp.diff(lane_rg_points_y) ** 2))
+    distances = jnp.cumsum(
+        jnp.sqrt(jnp.diff(lane_rg_points_x) ** 2 + jnp.diff(lane_rg_points_y) ** 2)
+    )
     new_distances = jnp.linspace(0, distances[-1], n_sample)
 
-    def _linear_interp(new_distances: jax.Array, distances: jax.Array, values: jax.Array) -> jax.Array:
+    def _linear_interp(
+        new_distances: jax.Array, distances: jax.Array, values: jax.Array
+    ) -> jax.Array:
         idx = jnp.searchsorted(distances, new_distances) - 1
         idx = jnp.clip(idx, 0, len(distances) - 2)
 

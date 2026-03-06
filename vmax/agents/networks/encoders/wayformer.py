@@ -124,7 +124,9 @@ class WayformerEncoder(nn.Module):
         """
         features, masks = self.unflatten_fn(obs)
 
-        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = features
+        sdc_traj_features, other_traj_features, rg_features, tl_features, gps_path_features = (
+            features
+        )
         sdc_traj_valid_mask, other_traj_valid_mask, rg_valid_mask, tl_valid_mask = masks
 
         num_objects, timestep_agent = other_traj_features.shape[-3:-1]
@@ -172,14 +174,22 @@ class WayformerEncoder(nn.Module):
         )
 
         # Positional Encoding - Page 3 paper
-        sdc_traj_encoding += jnp.expand_dims(self.param("sdc_traj_pe", init.normal(), (1, timestep_agent, self.dk)), 0)
+        sdc_traj_encoding += jnp.expand_dims(
+            self.param("sdc_traj_pe", init.normal(), (1, timestep_agent, self.dk)), 0
+        )
         other_traj_encoding += jnp.expand_dims(
             self.param("other_traj_pe", init.normal(), (num_objects, timestep_agent, self.dk)),
             0,
         )
-        rg_encoding += jnp.expand_dims(self.param("rg_pe", init.normal(), (num_roadgraph, self.dk)), 0)
-        tl_encoding += jnp.expand_dims(self.param("tj_pe", init.normal(), (num_light, timestep_tl, self.dk)), 0)
-        gps_path_encoding += jnp.expand_dims(self.param("gps_path_pe", init.normal(), (target_len, self.dk)), 0)
+        rg_encoding += jnp.expand_dims(
+            self.param("rg_pe", init.normal(), (num_roadgraph, self.dk)), 0
+        )
+        tl_encoding += jnp.expand_dims(
+            self.param("tj_pe", init.normal(), (num_light, timestep_tl, self.dk)), 0
+        )
+        gps_path_encoding += jnp.expand_dims(
+            self.param("gps_path_pe", init.normal(), (target_len, self.dk)), 0
+        )
 
         # Temporal Encoding
         temp_pe_agents = self.param("temp_pe_agents", init.normal(), (timestep_agent,))
@@ -214,7 +224,13 @@ class WayformerEncoder(nn.Module):
         if self.fusion_type == "early":
             # Concat the embeddings then apply self attention on the input concatenated
             concat_embeddings = jnp.concatenate(
-                [sdc_traj_encoding, other_traj_encoding, rg_encoding, tl_encoding, gps_path_encoding],
+                [
+                    sdc_traj_encoding,
+                    other_traj_encoding,
+                    rg_encoding,
+                    tl_encoding,
+                    gps_path_encoding,
+                ],
                 axis=1,
             )
             concat_masks = jnp.concatenate(
@@ -243,9 +259,15 @@ class WayformerEncoder(nn.Module):
                 other_traj_encoding,
                 other_traj_valid_mask,
             )
-            output_rg = self_attn(depth=self.attention_depth, name="rg_attention")(rg_encoding, rg_valid_mask)
-            output_tl = self_attn(depth=self.attention_depth, name="tl_attention")(tl_encoding, tl_valid_mask)
-            output_gps_path = self_attn(depth=self.attention_depth, name="gps_path_attention")(gps_path_encoding)
+            output_rg = self_attn(depth=self.attention_depth, name="rg_attention")(
+                rg_encoding, rg_valid_mask
+            )
+            output_tl = self_attn(depth=self.attention_depth, name="tl_attention")(
+                tl_encoding, tl_valid_mask
+            )
+            output_gps_path = self_attn(depth=self.attention_depth, name="gps_path_attention")(
+                gps_path_encoding
+            )
 
             # [B,M,D]
             output = jnp.concatenate(
@@ -263,9 +285,15 @@ class WayformerEncoder(nn.Module):
                 other_traj_encoding,
                 other_traj_valid_mask,
             )
-            output_rg = self_attn(depth=self.attention_depth, name="rg_attention")(rg_encoding, rg_valid_mask)
-            output_tl = self_attn(depth=self.attention_depth, name="tl_attention")(tl_encoding, tl_valid_mask)
-            output_gps_path = self_attn(depth=self.attention_depth, name="gps_path_attention")(gps_path_encoding)
+            output_rg = self_attn(depth=self.attention_depth, name="rg_attention")(
+                rg_encoding, rg_valid_mask
+            )
+            output_tl = self_attn(depth=self.attention_depth, name="tl_attention")(
+                tl_encoding, tl_valid_mask
+            )
+            output_gps_path = self_attn(depth=self.attention_depth, name="gps_path_attention")(
+                gps_path_encoding
+            )
 
             # [B,M,D]
             output = jnp.concatenate(

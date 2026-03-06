@@ -68,7 +68,9 @@ class ReplayBuffer:
             key=key,
         )
 
-    def insert(self, buffer_state: ReplayBufferState, samples: datatypes.RLTransition) -> ReplayBufferState:
+    def insert(
+        self, buffer_state: ReplayBufferState, samples: datatypes.RLTransition
+    ) -> ReplayBufferState:
         """Insert transitions into the replay buffer.
 
         Args:
@@ -99,9 +101,13 @@ class ReplayBuffer:
         insert_idx = (insert_idx + samples_size) % self._size
         sample_idx = jnp.minimum(buffer_state.sample_position + samples_size, self._size)
 
-        return buffer_state.replace(data=data, insert_position=insert_idx, sample_position=sample_idx)
+        return buffer_state.replace(
+            data=data, insert_position=insert_idx, sample_position=sample_idx
+        )
 
-    def sample(self, buffer_state: ReplayBufferState) -> tuple[ReplayBufferState, datatypes.RLTransition]:
+    def sample(
+        self, buffer_state: ReplayBufferState
+    ) -> tuple[ReplayBufferState, datatypes.RLTransition]:
         """Sample a batch of transitions from the replay buffer.
 
         Args:
@@ -119,17 +125,23 @@ class ReplayBuffer:
 
         key, sample_key = jax.random.split(buffer_state.key)
 
-        candidates = jax.random.randint(sample_key, (self._batch_size,), 0, buffer_state.sample_position)
+        candidates = jax.random.randint(
+            sample_key, (self._batch_size,), 0, buffer_state.sample_position
+        )
         mask = candidates != buffer_state.insert_position - 1
         idx = jnp.where(mask, candidates, buffer_state.insert_position - 2)
 
         # Cast data back to 32 bits after sampling.
-        current_data = jnp.take(buffer_state.data, idx, axis=0, unique_indices=True).astype(jnp.float32)
+        current_data = jnp.take(buffer_state.data, idx, axis=0, unique_indices=True).astype(
+            jnp.float32
+        )
         current_batch = self._unflatten_fn(current_data)
 
         # Get next observation from the next index in the buffer
         next_idx = (idx + self._samples_size) % buffer_state.sample_position
-        next_data = jnp.take(buffer_state.data, next_idx, axis=0, unique_indices=True).astype(jnp.float32)
+        next_data = jnp.take(buffer_state.data, next_idx, axis=0, unique_indices=True).astype(
+            jnp.float32
+        )
         next_batch = self._unflatten_fn(next_data)
 
         # Build full RL transitions with the next_observation

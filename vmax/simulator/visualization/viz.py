@@ -49,7 +49,9 @@ def plot_input_agent(
     if state.shape:
         raise ValueError(f"Expecting 0 batch dimension, got {len(state.shape)}")
 
-    viz_config = waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    viz_config = (
+        waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    )
 
     dict_viz_config = dataclasses.asdict(viz_config)
 
@@ -122,7 +124,9 @@ def plot_metrics(
     if state.shape:
         raise ValueError(f"Expecting 0 batch dimension, got {len(state.shape)}")
 
-    viz_config = waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    viz_config = (
+        waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    )
     dict_viz_config = dataclasses.asdict(viz_config)
 
     # Increase the figure size for better visibility.
@@ -205,7 +209,9 @@ def plot_gaussian_curves(list_values, params):
     x = np.linspace(-1, 1, 1000)
 
     accel_y = np.exp(-0.5 * ((x - accel_mean) / accel_std) ** 2) / (accel_std * np.sqrt(2 * np.pi))
-    steering_y = np.exp(-0.5 * ((x - steering_mean) / steering_std) ** 2) / (steering_std * np.sqrt(2 * np.pi))
+    steering_y = np.exp(-0.5 * ((x - steering_mean) / steering_std) ** 2) / (
+        steering_std * np.sqrt(2 * np.pi)
+    )
 
     ax[0].plot(x, accel_y, label="Accel")
     ax[0].set_title("Accel")
@@ -338,7 +344,9 @@ def plot_pdm_debug(  # noqa: C901
     if obs.shape:
         raise ValueError(f"Expecting shape () for obs, got {obs.shape}")
 
-    viz_config = waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    viz_config = (
+        waymax_utils.VizConfig() if viz_config is None else waymax_utils.VizConfig(**viz_config)
+    )
     fig, ax = waymax_utils.init_fig_ax(viz_config)
 
     # 1. Plots trajectory.

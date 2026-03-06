@@ -154,7 +154,9 @@ def filter_box_roadgraph_points(
     )
 
 
-def filter_topk_roadgraph_points(roadgraph: RoadgraphPoints, reference_points: jax.Array, topk: int) -> RoadgraphPoints:
+def filter_topk_roadgraph_points(
+    roadgraph: RoadgraphPoints, reference_points: jax.Array, topk: int
+) -> RoadgraphPoints:
     """Return the top-k closest roadgraph points to a reference point.
 
     Args:

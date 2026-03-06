@@ -19,7 +19,6 @@ from vmax.agents.pipeline import inference, pmap
 from vmax.scripts.training import train_utils
 from vmax.simulator import metrics as _metrics
 
-
 if typing.TYPE_CHECKING:
     from waymax import datatypes as waymax_datatypes
     from waymax import env as waymax_env
@@ -157,7 +156,13 @@ def train(
     current_step = 0
 
     print("-> Ground Control to Major Tom...")
-    for iter in tqdm(range(total_iters), desc="Training", total=total_iters, dynamic_ncols=True, disable=disable_tqdm):
+    for iter in tqdm(
+        range(total_iters),
+        desc="Training",
+        total=total_iters,
+        dynamic_ncols=True,
+        disable=disable_tqdm,
+    ):
         rng, iter_key = jax.random.split(rng)
         iter_keys = jax.random.split(iter_key, num_devices)
 
@@ -208,7 +213,9 @@ def train(
             metrics["runtime/training_time"] = epoch_training_time
             metrics["runtime/log_time"] = epoch_log_time
             metrics["runtime/eval_time"] = epoch_eval_time
-            metrics["runtime/iter_time"] = epoch_data_time + epoch_training_time + epoch_log_time + epoch_eval_time
+            metrics["runtime/iter_time"] = (
+                epoch_data_time + epoch_training_time + epoch_log_time + epoch_eval_time
+            )
             metrics["runtime/wall_time"] = perf_counter() - time_training
             metrics["train/rl_gradient_steps"] = int(pmap.unpmap(training_state.rl_gradient_steps))
             metrics["train/env_steps"] = current_step
@@ -216,7 +223,9 @@ def train(
             progress_fn(current_step, metrics, total_timesteps)
 
             if disable_tqdm:
-                print(f"-> Step {current_step}/{total_timesteps} - {(current_step / total_timesteps) * 100:.2f}%")
+                print(
+                    f"-> Step {current_step}/{total_timesteps} - {(current_step / total_timesteps) * 100:.2f}%"
+                )
 
     print(f"-> Training took {perf_counter() - time_training:.2f}s")
     assert current_step >= total_timesteps

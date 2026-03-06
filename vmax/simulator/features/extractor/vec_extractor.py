@@ -12,7 +12,6 @@ from waymax import datatypes
 from vmax.simulator import features, operations, overrides
 from vmax.simulator.features import extractor
 
-
 FEATURE_MAP = {
     "waypoints": ("xy",),
     "velocity": ("vel_xy",),
@@ -28,8 +27,14 @@ FEATURE_MAP = {
 
 
 TYPE_MAP = {
-    "lane_center": [datatypes.MapElementIds.LANE_SURFACE_STREET, datatypes.MapElementIds.LANE_FREEWAY],
-    "road_edge": [datatypes.MapElementIds.ROAD_EDGE_BOUNDARY, datatypes.MapElementIds.ROAD_EDGE_MEDIAN],
+    "lane_center": [
+        datatypes.MapElementIds.LANE_SURFACE_STREET,
+        datatypes.MapElementIds.LANE_FREEWAY,
+    ],
+    "road_edge": [
+        datatypes.MapElementIds.ROAD_EDGE_BOUNDARY,
+        datatypes.MapElementIds.ROAD_EDGE_MEDIAN,
+    ],
     "road_line": [
         datatypes.MapElementIds.ROAD_LINE_BROKEN_SINGLE_WHITE,
         datatypes.MapElementIds.ROAD_LINE_SOLID_SINGLE_WHITE,
@@ -116,12 +121,14 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         if self._meters_box is None:
             self._roadgraph_top_k_prefilter = max(self._roadgraph_top_k, 2000)
         else:
-            self._roadgraph_top_k_prefilter = (self._meters_box["front"] + self._meters_box["back"]) * (
-                self._meters_box["left"] + self._meters_box["right"]
-            )
+            self._roadgraph_top_k_prefilter = (
+                self._meters_box["front"] + self._meters_box["back"]
+            ) * (self._meters_box["left"] + self._meters_box["right"])
 
         # Traffic lights
-        self._num_closest_traffic_lights = self._traffic_light_config.get("num_closest_traffic_lights", 16)
+        self._num_closest_traffic_lights = self._traffic_light_config.get(
+            "num_closest_traffic_lights", 16
+        )
 
         # Path target
         self._num_target_path_points = self._path_target_config.get("num_points", 10)
@@ -135,9 +142,15 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         # Build feature keys
         self._object_features_key = self._extract_feature_keys(self._objects_config["features"])
-        self._roadgraph_features_key = self._extract_feature_keys(self._roadgraphs_config["features"])
-        self._traffic_lights_features_key = self._extract_feature_keys(self._traffic_light_config["features"])
-        self._path_target_features_key = self._extract_feature_keys(self._path_target_config["features"])
+        self._roadgraph_features_key = self._extract_feature_keys(
+            self._roadgraphs_config["features"]
+        )
+        self._traffic_lights_features_key = self._extract_feature_keys(
+            self._traffic_light_config["features"]
+        )
+        self._path_target_features_key = self._extract_feature_keys(
+            self._path_target_config["features"]
+        )
 
     def _extract_feature_keys(self, feature_names: list[str]) -> list[str]:
         """Extract feature keys from feature names using FEATURE_MAP.
@@ -162,7 +175,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         """Return the number of past steps considered for observation."""
         return self._obs_past_num_steps
 
-    def _get_sdc_observation(self, state: datatypes.SimulatorState, key: jax.Array = None) -> datatypes.Observation:
+    def _get_sdc_observation(
+        self, state: datatypes.SimulatorState, key: jax.Array = None
+    ) -> datatypes.Observation:
         """Retrieve the SDC observation from the simulator state.
 
         Args:
@@ -243,7 +258,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
             path_target_features.data,
         )
 
-    def unflatten_features(self, vectorized_obs: jax.Array) -> tuple[tuple[jax.Array, ...], tuple[jax.Array, ...]]:
+    def unflatten_features(
+        self, vectorized_obs: jax.Array
+    ) -> tuple[tuple[jax.Array, ...], tuple[jax.Array, ...]]:
         """Unflatten a vectorized observation into features and masks.
 
         Args:
@@ -265,7 +282,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         path_target_feature_size = self.get_features_size(self._path_target_features_key)
 
         sdc_object_size = 1 * self._obs_past_num_steps * object_features_size
-        sdc_object_features = vectorized_obs[..., unflatten_size : unflatten_size + sdc_object_size]
+        sdc_object_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + sdc_object_size
+        ]
         sdc_object_features = sdc_object_features.reshape(
             *batch_dims,
             1,
@@ -274,8 +293,12 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         )
         unflatten_size += sdc_object_size
 
-        other_objects_size = self._num_closest_objects * self._obs_past_num_steps * object_features_size
-        other_objects_features = vectorized_obs[..., unflatten_size : unflatten_size + other_objects_size]
+        other_objects_size = (
+            self._num_closest_objects * self._obs_past_num_steps * object_features_size
+        )
+        other_objects_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + other_objects_size
+        ]
         other_objects_features = other_objects_features.reshape(
             *batch_dims,
             self._num_closest_objects,
@@ -293,8 +316,14 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         )
         unflatten_size += roadgraph_size
 
-        traffic_lights_size = self._num_closest_traffic_lights * self._obs_past_num_steps * traffic_lights_features_size
-        traffic_lights_features = vectorized_obs[..., unflatten_size : unflatten_size + traffic_lights_size]
+        traffic_lights_size = (
+            self._num_closest_traffic_lights
+            * self._obs_past_num_steps
+            * traffic_lights_features_size
+        )
+        traffic_lights_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + traffic_lights_size
+        ]
         traffic_lights_features = traffic_lights_features.reshape(
             *batch_dims,
             self._num_closest_traffic_lights,
@@ -304,7 +333,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         unflatten_size += traffic_lights_size
 
         path_target_size = self._num_target_path_points * path_target_feature_size
-        path_target_features = vectorized_obs[..., unflatten_size : unflatten_size + path_target_size]
+        path_target_features = vectorized_obs[
+            ..., unflatten_size : unflatten_size + path_target_size
+        ]
         path_target_features = path_target_features.reshape(
             *batch_dims,
             self._num_target_path_points,
@@ -312,7 +343,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         )
         unflatten_size += path_target_size
 
-        assert flatten_size == unflatten_size, f"Unflatten size {unflatten_size} does not match {flatten_size}"
+        assert (
+            flatten_size == unflatten_size
+        ), f"Unflatten size {unflatten_size} does not match {flatten_size}"
 
         features = (
             sdc_object_features[..., :-1],
@@ -375,7 +408,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         # Calculate distances and find closest objects
         distances_ego_objects = jnp.linalg.norm(sdc_obs.trajectory.xy[:, -1, :], axis=-1)
-        distances_ego_valid_objects = jnp.where(sdc_obs.trajectory.valid[:, -1], distances_ego_objects, jnp.inf)
+        distances_ego_valid_objects = jnp.where(
+            sdc_obs.trajectory.valid[:, -1], distances_ego_objects, jnp.inf
+        )
 
         # Get indices of closest objects
         closest_object_idxs = operations.get_index(
@@ -386,9 +421,15 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         object_features = features.ObjectFeatures(field_names=self._object_features_key)
         for key in self._object_features_key:
-            feature = getattr(sdc_obs.metadata, key) if key == "object_types" else getattr(sdc_obs.trajectory, key)
+            feature = (
+                getattr(sdc_obs.metadata, key)
+                if key == "object_types"
+                else getattr(sdc_obs.trajectory, key)
+            )
             feature = feature[closest_object_idxs]
-            feature = extractor.normalize_by_feature(feature, key, self._max_meters, self._dict_mapping)
+            feature = extractor.normalize_by_feature(
+                feature, key, self._max_meters, self._dict_mapping
+            )
 
             if feature.ndim == 2:
                 feature = jnp.expand_dims(feature, axis=-1)
@@ -397,7 +438,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         return object_features
 
-    def _build_roadgraph_features(self, sdc_obs: datatypes.Observation) -> features.RoadgraphFeatures:
+    def _build_roadgraph_features(
+        self, sdc_obs: datatypes.Observation
+    ) -> features.RoadgraphFeatures:
         """Create roadgraph features from the SDC observation.
 
         Args:
@@ -412,11 +455,15 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
         if len(self._roadgraph_features_key) == 0:
             return roadgraph_features
 
-        roadgraph_points = self._reduce_and_filter_roadgraph_points(sdc_obs.roadgraph_static_points)
+        roadgraph_points = self._reduce_and_filter_roadgraph_points(
+            sdc_obs.roadgraph_static_points
+        )
 
         for key in self._roadgraph_features_key:
             feature = getattr(roadgraph_points, key)
-            feature = extractor.normalize_by_feature(feature, key, self._max_meters, self._dict_mapping)
+            feature = extractor.normalize_by_feature(
+                feature, key, self._max_meters, self._dict_mapping
+            )
 
             if feature.ndim == 1:
                 feature = jnp.expand_dims(feature, axis=-1)
@@ -425,7 +472,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         return roadgraph_features
 
-    def _build_traffic_lights_features(self, sdc_obs: datatypes.Observation) -> features.TrafficLightFeatures:
+    def _build_traffic_lights_features(
+        self, sdc_obs: datatypes.Observation
+    ) -> features.TrafficLightFeatures:
         """Create traffic light features from the SDC observation.
 
         Args:
@@ -435,7 +484,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
             An instance of TrafficLightFeatures.
 
         """
-        traffic_light_features = features.TrafficLightFeatures(field_names=self._traffic_lights_features_key)
+        traffic_light_features = features.TrafficLightFeatures(
+            field_names=self._traffic_lights_features_key
+        )
 
         if len(self._traffic_lights_features_key) == 0:
             return traffic_light_features
@@ -457,7 +508,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         for key in self._traffic_lights_features_key:
             feature = getattr(sdc_obs.traffic_lights, key)[closest_tl_idxs]
-            feature = extractor.normalize_by_feature(feature, key, self._max_meters, self._dict_mapping)
+            feature = extractor.normalize_by_feature(
+                feature, key, self._max_meters, self._dict_mapping
+            )
 
             if feature.ndim == 2:
                 feature = jnp.expand_dims(feature, axis=-1)
@@ -466,7 +519,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         return traffic_light_features
 
-    def _build_target_features(self, sdc_obs: datatypes.Observation) -> features.PathTargetFeatures:
+    def _build_target_features(
+        self, sdc_obs: datatypes.Observation
+    ) -> features.PathTargetFeatures:
         """Build path target features from the SDC observation.
 
         Args:
@@ -505,7 +560,9 @@ class VecFeaturesExtractor(extractor.AbstractFeaturesExtractor):
 
         return features.PathTargetFeatures(xy=path_target)
 
-    def _reduce_and_filter_roadgraph_points(self, roadgraph: datatypes.RoadgraphPoints) -> datatypes.RoadgraphPoints:
+    def _reduce_and_filter_roadgraph_points(
+        self, roadgraph: datatypes.RoadgraphPoints
+    ) -> datatypes.RoadgraphPoints:
         """Reduce and filter roadgraph points.
 
         Args:

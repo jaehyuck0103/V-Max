@@ -12,7 +12,6 @@ import jax.numpy as jnp
 
 from vmax.agents import pipeline
 
-
 if typing.TYPE_CHECKING:
     from waymax import datatypes as waymax_datatypes
     from waymax import env as waymax_env
@@ -195,7 +194,9 @@ def _reshape_metrics(rollout_metrics: dict, sgd_metrics: dict) -> dict:
 
     """
     # (num_episodes, unroll_length, num_envs) -> (num_steps, num_envs)
-    rollout_metrics = jax.tree_util.tree_map(lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), rollout_metrics)
+    rollout_metrics = jax.tree_util.tree_map(
+        lambda x: jnp.reshape(x, (-1,) + x.shape[2:]), rollout_metrics
+    )
     # (num_steps, num_envs) -> (num_envs, num_steps)
     rollout_metrics = jax.tree_util.tree_map(lambda x: jnp.swapaxes(x, 0, 1), rollout_metrics)
     # (scan_length, grad_updates_per_step)

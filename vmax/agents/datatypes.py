@@ -8,7 +8,6 @@ from typing import Any, NamedTuple, Protocol
 import flax
 import jax
 
-
 Params = Any
 Metrics = Mapping[str, jax.Array]
 ActivationFn = Callable[[jax.Array], jax.Array]

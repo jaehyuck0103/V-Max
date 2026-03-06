@@ -7,7 +7,14 @@ from .abstract_extractor import AbstractFeaturesExtractor  # noqa: I001
 from .vec_extractor import VecFeaturesExtractor
 from .gt_extractor import GTFeaturesExtractor
 from .idm_extractor import IDMFeaturesExtractor
-from .utils import OBJECT_MAPPING, RG_MAPPING, TL_MAPPING, get_feature_size, normalize_by_feature, normalize_path
+from .utils import (
+    OBJECT_MAPPING,
+    RG_MAPPING,
+    TL_MAPPING,
+    get_feature_size,
+    normalize_by_feature,
+    normalize_path,
+)
 
 
 __all__ = [

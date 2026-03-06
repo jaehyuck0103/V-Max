@@ -105,7 +105,11 @@ def get_sdc_lane(
     init_val = closest_idx_centerlane
     final_idx = jax.lax.while_loop(cond_fun, body_fun, init_val) - 1
 
-    return closest_id_centerlane, roadgraph_xy[final_idx], jnp.array([closest_idx_centerlane, final_idx])
+    return (
+        closest_id_centerlane,
+        roadgraph_xy[final_idx],
+        jnp.array([closest_idx_centerlane, final_idx]),
+    )
 
 
 def get_next_lane(
@@ -152,7 +156,12 @@ def get_next_lane(
     lane_size = jnp.sum(lane_id == roadgraph.ids) - 1
     lane_point = roadgraph.xy[closest_idx_sdc_traj + lane_size]
 
-    return masked_xy, lane_id, lane_point, jnp.array([closest_idx_sdc_traj, closest_idx_sdc_traj + lane_size])
+    return (
+        masked_xy,
+        lane_id,
+        lane_point,
+        jnp.array([closest_idx_sdc_traj, closest_idx_sdc_traj + lane_size]),
+    )
 
 
 def get_path_target_lane_ids(simulator_state: datatypes.SimulatorState) -> jax.Array:
@@ -185,7 +194,11 @@ def get_path_target_lane_ids(simulator_state: datatypes.SimulatorState) -> jax.A
         return (lanes_xy, next_id, next_point), tuple_idx
 
     # Mask roadgraph points that are not lane center
-    lanes_xy = jnp.where(roadgraph.types[:, None] == datatypes.MapElementIds.LANE_SURFACE_STREET, roadgraph.xy, jnp.inf)
+    lanes_xy = jnp.where(
+        roadgraph.types[:, None] == datatypes.MapElementIds.LANE_SURFACE_STREET,
+        roadgraph.xy,
+        jnp.inf,
+    )
 
     _id, next_point, _tuple_idx = get_sdc_lane(roadgraph, sdc_xy, sdc_yaw)
 
@@ -196,7 +209,9 @@ def get_path_target_lane_ids(simulator_state: datatypes.SimulatorState) -> jax.A
     return jnp.vstack([_tuple_idx, list_idx])
 
 
-def build_path_target(simulator_state: datatypes.SimulatorState) -> tuple[jax.Array, jax.Array, jax.Array]:
+def build_path_target(
+    simulator_state: datatypes.SimulatorState,
+) -> tuple[jax.Array, jax.Array, jax.Array]:
     """Construct the SDC path target.
 
     Args:
@@ -226,7 +241,9 @@ def build_path_target(simulator_state: datatypes.SimulatorState) -> tuple[jax.Ar
     list_idx = get_path_target_lane_ids(simulator_state)
     count = 0
 
-    result = jax.lax.scan(body_fn, (count, jnp.zeros(300), jnp.zeros(300), jnp.zeros(300), jnp.zeros(300)), list_idx)[0]
+    result = jax.lax.scan(
+        body_fn, (count, jnp.zeros(300), jnp.zeros(300), jnp.zeros(300), jnp.zeros(300)), list_idx
+    )[0]
 
     _, x, y, ids, valids = result
 

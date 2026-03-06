@@ -4,7 +4,9 @@ import jax.numpy as jnp
 from waymax import datatypes
 
 
-def apply_random_masking(sdc_observation: datatypes.Observation, key: jax.Array) -> datatypes.Observation:
+def apply_random_masking(
+    sdc_observation: datatypes.Observation, key: jax.Array
+) -> datatypes.Observation:
     """Apply a mask to an SDC observation. Only applied to objects and traffic lights.
 
     Masking is not persistant through time. The probability of an object or traffic light being observed is relative
@@ -37,7 +39,9 @@ def apply_random_masking(sdc_observation: datatypes.Observation, key: jax.Array)
     tl_distance = jnp.linalg.norm(traffic_lights.xy[:, -1], axis=-1)
     tl_prob = jnp.exp(-tl_distance / scale)
     tl_random = jax.random.uniform(key_tl, shape=tl_prob.shape)
-    new_tl_valid = traffic_lights.valid.at[:, -1].set(traffic_lights.valid[:, -1] & (tl_random < tl_prob))
+    new_tl_valid = traffic_lights.valid.at[:, -1].set(
+        traffic_lights.valid[:, -1] & (tl_random < tl_prob)
+    )
 
     # Assign updated valid fields back to the observation
     objects = objects.replace(valid=new_obj_valid)
@@ -46,7 +50,9 @@ def apply_random_masking(sdc_observation: datatypes.Observation, key: jax.Array)
     return sdc_observation.replace(trajectory=objects, traffic_lights=traffic_lights)
 
 
-def apply_gaussian_noise(sdc_observation: datatypes.Observation, key: jax.Array) -> datatypes.Observation:
+def apply_gaussian_noise(
+    sdc_observation: datatypes.Observation, key: jax.Array
+) -> datatypes.Observation:
     """Apply Gaussian noise to the observation. Each data point is perturbed by a random value sampled from a Gaussian
     distribution. The standard deviation of the distribution is 0.1 times the range of the data point.
 
@@ -85,7 +91,9 @@ def apply_gaussian_noise(sdc_observation: datatypes.Observation, key: jax.Array)
     traffic_lights = traffic_lights.replace(x=new_tl_xy[:, :, 0], y=new_tl_xy[:, :, 1])
     roadgraph = roadgraph.replace(x=new_rg_xy[:, 0], y=new_rg_xy[:, 1])
 
-    return sdc_observation.replace(trajectory=objects, traffic_lights=traffic_lights, roadgraph_static_points=roadgraph)
+    return sdc_observation.replace(
+        trajectory=objects, traffic_lights=traffic_lights, roadgraph_static_points=roadgraph
+    )
 
 
 def apply_obstruction(sdc_observation: datatypes.Observation) -> datatypes.Trajectory:

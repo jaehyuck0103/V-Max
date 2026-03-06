@@ -74,22 +74,32 @@ class ObservationWrapper(Wrapper):
         # Get sizes from the extractor
         object_features_size = extractor.get_features_size(extractor._object_features_key)
         roadgraph_features_size = extractor.get_features_size(extractor._roadgraph_features_key)
-        traffic_lights_features_size = extractor.get_features_size(extractor._traffic_lights_features_key)
+        traffic_lights_features_size = extractor.get_features_size(
+            extractor._traffic_lights_features_key
+        )
         path_target_feature_size = extractor.get_features_size(extractor._path_target_features_key)
 
         # Calculate total size
         sdc_size = 1 * extractor._obs_past_num_steps * object_features_size
-        other_objects_size = extractor._num_closest_objects * extractor._obs_past_num_steps * object_features_size
+        other_objects_size = (
+            extractor._num_closest_objects * extractor._obs_past_num_steps * object_features_size
+        )
         roadgraph_size = extractor._roadgraph_top_k * roadgraph_features_size
         traffic_lights_size = (
-            extractor._num_closest_traffic_lights * extractor._obs_past_num_steps * traffic_lights_features_size
+            extractor._num_closest_traffic_lights
+            * extractor._obs_past_num_steps
+            * traffic_lights_features_size
         )
         path_target_size = extractor._num_target_path_points * path_target_feature_size
 
         # Return total size
-        return sdc_size + other_objects_size + roadgraph_size + traffic_lights_size + path_target_size
+        return (
+            sdc_size + other_objects_size + roadgraph_size + traffic_lights_size + path_target_size
+        )
 
-    def observe(self, simulator_state: datatypes.SimulatorState, key: jax.Array = None) -> jax.Array:
+    def observe(
+        self, simulator_state: datatypes.SimulatorState, key: jax.Array = None
+    ) -> jax.Array:
         """Generate observation vector from simulator state.
 
         This method extracts features from the simulator state and concatenates them

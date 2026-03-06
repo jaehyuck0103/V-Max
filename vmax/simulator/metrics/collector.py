@@ -9,7 +9,6 @@ import numpy as np
 
 from vmax.simulator.metrics import aggregators
 
-
 _metrics_operands = {
     "ep_len_mean": aggregators.final,  # cumulative number of steps
     "ep_rew_mean": aggregators.final,  # cumulative reward at each timestep
@@ -71,11 +70,15 @@ def collect(metrics: dict, key_metric: str) -> dict:
         list_metric = np.split(metric, split_indices)
 
         if not isinstance(operand, dict):
-            episode_values = np.array([operand(l_metric) for l_metric in list_metric if len(l_metric) > 0])
+            episode_values = np.array(
+                [operand(l_metric) for l_metric in list_metric if len(l_metric) > 0]
+            )
             episode_metrics[key] = np.mean(episode_values)
         else:
             for sub_key, sub_operand in operand.items():
-                episode_values = np.array([sub_operand(l_metric) for l_metric in list_metric if len(l_metric) > 0])
+                episode_values = np.array(
+                    [sub_operand(l_metric) for l_metric in list_metric if len(l_metric) > 0]
+                )
                 episode_metrics[sub_key] = np.mean(episode_values)
 
     episode_metrics["nuplan_aggregate_score"] = aggregators.nuplan_aggregate_score(episode_metrics)
